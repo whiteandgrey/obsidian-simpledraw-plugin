@@ -14,7 +14,7 @@
 
 ## 安装 Installation
 
-复制 `main.js`、`manifest.json`、`styles.css` 到 `.obsidian/plugins/simple-draw/`。Copy these files into `.obsidian/plugins/simple-draw/`.
+复制 `main.js`、`manifest.json`、`styles.css`(非必须) 到 `.obsidian/plugins/simple-draw/`。Copy these files into `.obsidian/plugins/simple-draw/`.
 
 ## 使用 Usage
 
