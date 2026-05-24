@@ -701,6 +701,9 @@ export class SimpleDrawView extends TextFileView {
         // Check if clicking on an element
         const clickedEl = this.engine.getElementAt(pos.x, pos.y);
 
+        // Locked textboxes — don't select, move, or resize
+        if (clickedEl && clickedEl.type === 'textbox' && (clickedEl as TextBoxData).locked) return;
+
         if (clickedEl) {
             // Select element (preserve group when clicking an already-selected member)
             if (additive) {
@@ -898,6 +901,7 @@ export class SimpleDrawView extends TextFileView {
         const canvasPos = this.engine.screenToCanvas(e.clientX, e.clientY);
         const el = this.engine.getElementAt(canvasPos.x, canvasPos.y);
         if (el && el.type === 'textbox') {
+            if ((el as TextBoxData).locked) return;
             this.startEditingTextbox(el.id);
         } else if (el && el.type === 'arrow') {
             this.showArrowEditor(el.id);
@@ -916,18 +920,30 @@ export class SimpleDrawView extends TextFileView {
         }
 
         const menu = new Menu();
-        menu.addItem((item) => {
-            item.setTitle(t('contextMenu.bringToFront')).setIcon('arrow-up').onClick(() => {
-                this.engine.sendTextboxToFront(el.id);
-                this.rebuildAll();
+        if ((el as TextBoxData).locked) {
+            menu.addItem((item) => {
+                item.setTitle(t('contextMenu.unlock')).setIcon('lock').onClick(() => {
+                    const tb = el as TextBoxData;
+                    tb.locked = false;
+                    this.engine.saveHistory();
+                    this.engine.notifyChange();
+                    this.requestRender();
+                });
             });
-        });
-        menu.addItem((item) => {
-            item.setTitle(t('contextMenu.sendToBack')).setIcon('arrow-down').onClick(() => {
-                this.engine.sendTextboxToBack(el.id);
-                this.rebuildAll();
+        } else {
+            menu.addItem((item) => {
+                item.setTitle(t('contextMenu.bringToFront')).setIcon('arrow-up').onClick(() => {
+                    this.engine.sendTextboxToFront(el.id);
+                    this.rebuildAll();
+                });
             });
-        });
+            menu.addItem((item) => {
+                item.setTitle(t('contextMenu.sendToBack')).setIcon('arrow-down').onClick(() => {
+                    this.engine.sendTextboxToBack(el.id);
+                    this.rebuildAll();
+                });
+            });
+        }
         menu.showAtPosition({ x: e.clientX, y: e.clientY });
     }
 
@@ -1006,6 +1022,7 @@ export class SimpleDrawView extends TextFileView {
     startEditingTextbox(id: string): void {
         const el = this.engine.data.elements.find(e => e.id === id && e.type === 'textbox') as TextBoxData | undefined;
         if (!el) return;
+        if (el.locked) return;
 
         this.closeEditors();
         this.engine.editingTextboxId = id;
@@ -1165,6 +1182,26 @@ export class SimpleDrawView extends TextFileView {
             toolbar.appendChild(btn);
         }
         updateShapeHighlights();
+
+        // Lock button
+        const lockBtn = this.createSmallButton(el.locked ? '🔒' : '🔓', el.locked ? t('textboxEditor.unlock') : t('textboxEditor.lock'));
+        lockBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            el.locked = !el.locked;
+            lockBtn.textContent = el.locked ? '🔒' : '🔓';
+            lockBtn.title = el.locked ? t('textboxEditor.unlock') : t('textboxEditor.lock');
+            if (el.locked) {
+                this.engine.selectedIds.delete(el.id);
+                if (this.engine.onSelectionChange) this.engine.onSelectionChange();
+            }
+            this.engine.saveHistory();
+            this.engine.notifyChange();
+            if (el.locked) {
+                this.closeEditors();
+                this.requestRender();
+            }
+        });
+        toolbar.appendChild(lockBtn);
 
         // Confirm button
         const confirmBtn = this.createSmallButton('✓', t('textboxEditor.confirm'));
@@ -1937,6 +1974,24 @@ export class SimpleDrawView extends TextFileView {
         handles.forEach(h => {
             (h as HTMLElement).style.display = (isSelected && !isEditing) ? 'block' : 'none';
         });
+
+        // Lock icon
+        let lockIcon = wrapper.querySelector('.simpledraw-lock-icon') as HTMLElement | null;
+        if (tb.locked) {
+            if (!lockIcon) {
+                lockIcon = wrapper.createDiv('simpledraw-lock-icon');
+                lockIcon.style.position = 'absolute';
+                lockIcon.style.top = '2px';
+                lockIcon.style.right = '2px';
+                lockIcon.style.fontSize = '12px';
+                lockIcon.style.pointerEvents = 'none';
+                lockIcon.style.zIndex = '15';
+                lockIcon.style.opacity = '0.6';
+                lockIcon.textContent = '🔒';
+            }
+        } else {
+            if (lockIcon) lockIcon.remove();
+        }
     }
 
     getResizeCursor(handle: string): string {
@@ -1992,7 +2047,7 @@ export class SimpleDrawView extends TextFileView {
                 const snapCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
                 snapCircle.setAttribute('cx', String(snapped.x));
                 snapCircle.setAttribute('cy', String(snapped.y));
-                snapCircle.setAttribute('r', '8');
+                snapCircle.setAttribute('r', String(this.settings.snapPreviewRadius));
                 snapCircle.style.fill = 'rgba(74, 144, 217, 0.3)';
                 snapCircle.style.stroke = '#4a90d9';
                 snapCircle.setAttribute('stroke-width', '2');
@@ -2013,25 +2068,27 @@ export class SimpleDrawView extends TextFileView {
                 mx = snapped.x;
                 my = snapped.y;
                 // Highlight snapped anchor
-                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-                svg.style.position = 'absolute';
-                svg.style.top = '0';
-                svg.style.left = '0';
-                svg.style.width = '100%';
-                svg.style.height = '100%';
-                svg.style.pointerEvents = 'none';
-                svg.style.overflow = 'visible';
-                svg.style.zIndex = '9999';
-                svg.classList.add('simpledraw-snap-preview');
-                const snapCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-                snapCircle.setAttribute('cx', String(snapped.x));
-                snapCircle.setAttribute('cy', String(snapped.y));
-                snapCircle.setAttribute('r', '8');
-                snapCircle.style.fill = 'rgba(74, 144, 217, 0.3)';
-                snapCircle.style.stroke = '#4a90d9';
-                snapCircle.setAttribute('stroke-width', '2');
-                svg.appendChild(snapCircle);
-                this.viewportEl.appendChild(svg);
+                {
+                    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                    svg.style.position = 'absolute';
+                    svg.style.top = '0';
+                    svg.style.left = '0';
+                    svg.style.width = '100%';
+                    svg.style.height = '100%';
+                    svg.style.pointerEvents = 'none';
+                    svg.style.overflow = 'visible';
+                    svg.style.zIndex = '9999';
+                    svg.classList.add('simpledraw-snap-preview');
+                    const snapCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    snapCircle.setAttribute('cx', String(snapped.x));
+                    snapCircle.setAttribute('cy', String(snapped.y));
+                    snapCircle.setAttribute('r', String(this.settings.snapPreviewRadius));
+                    snapCircle.style.fill = 'rgba(74, 144, 217, 0.3)';
+                    snapCircle.style.stroke = '#4a90d9';
+                    snapCircle.setAttribute('stroke-width', '2');
+                    svg.appendChild(snapCircle);
+                    this.viewportEl.appendChild(svg);
+                }
             }
 
             // Draw start point dot to show first click is locked in
@@ -2411,6 +2468,8 @@ export class SimpleDrawView extends TextFileView {
 
         // Clone elements layer (textboxes with rendered markdown)
         const elementsClone = this.elementsLayer.cloneNode(true) as HTMLElement;
+        // Strip lock icons from export
+        elementsClone.querySelectorAll('.simpledraw-lock-icon').forEach(el => el.remove());
         elementsClone.style.position = 'absolute';
         elementsClone.style.left = '0px';
         elementsClone.style.top = '0px';

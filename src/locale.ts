@@ -84,6 +84,7 @@ const zh: Record<string, string> = {
     // Context menu
     'contextMenu.bringToFront': '置顶',
     'contextMenu.sendToBack': '置底',
+    'contextMenu.unlock': '🔓 解锁',
 
     // Textbox editor
     'textboxEditor.toggleVisibility': '显隐切换 (边框+填充)',
@@ -103,6 +104,8 @@ const zh: Record<string, string> = {
     'textboxEditor.fontSize.shrink': '缩小字体',
     'textboxEditor.fontSize.grow': '放大字体',
     'textboxEditor.fontSize.reset': '重置字体大小',
+    'textboxEditor.lock': '锁定文本框',
+    'textboxEditor.unlock': '解锁文本框',
 
     // Arrow editor
     'arrowEditor.toggleStart': '尾部箭头显隐切换',
@@ -127,12 +130,20 @@ const zh: Record<string, string> = {
     'settings.section.arrow': '箭头设置',
     'settings.section.textbox': '文本框设置',
     'settings.section.shortcuts': '快捷键',
+    'settings.section.snap': '吸附功能',
 
     // New settings
     'settings.showAnchorDots.name': '显示箭头连接点',
     'settings.showAnchorDots.desc': '在箭头与文本框连接处显示小圆点标记',
     'settings.textboxDefaultFontSize.name': '默认字号',
     'settings.textboxDefaultFontSize.desc': '新建文本框的默认字体大小（8-72px）',
+
+    'settings.anchorScheme.name': '锚点方案',
+    'settings.anchorScheme.desc': '选择文本框的锚点布局方案',
+    'settings.anchorScheme.scheme1': '方案一：角点 + 边中点（8锚点）',
+    'settings.anchorScheme.scheme2': '方案二：边中点 + 四分之一点（12锚点）',
+    'settings.snapPreviewRadius.name': '吸附预览圆圈大小',
+    'settings.snapPreviewRadius.desc': '箭头插入模式下吸附预览圆圈的大小（4-20px）',
 
     // Notices
     'notice.emptyCanvas': '画板为空，无内容可导出',
@@ -204,6 +215,7 @@ const en: Record<string, string> = {
     // Context menu
     'contextMenu.bringToFront': 'Bring to Front',
     'contextMenu.sendToBack': 'Send to Back',
+    'contextMenu.unlock': '🔓 Unlock',
 
     // Textbox editor
     'textboxEditor.toggleVisibility': 'Toggle Visibility (Border+Fill)',
@@ -223,6 +235,8 @@ const en: Record<string, string> = {
     'textboxEditor.fontSize.shrink': 'Decrease Font',
     'textboxEditor.fontSize.grow': 'Increase Font',
     'textboxEditor.fontSize.reset': 'Reset Font Size',
+    'textboxEditor.lock': 'Lock Textbox',
+    'textboxEditor.unlock': 'Unlock Textbox',
 
     // Arrow editor
     'arrowEditor.toggleStart': 'Toggle Start Arrow',
@@ -247,12 +261,20 @@ const en: Record<string, string> = {
     'settings.section.arrow': 'Arrow',
     'settings.section.textbox': 'Textbox',
     'settings.section.shortcuts': 'Shortcuts',
+    'settings.section.snap': 'Snap',
 
     // New settings
     'settings.showAnchorDots.name': 'Show Anchor Dots',
     'settings.showAnchorDots.desc': 'Show small dots at arrow connection points',
     'settings.textboxDefaultFontSize.name': 'Default Font Size',
     'settings.textboxDefaultFontSize.desc': 'Default font size for new textboxes (8-72px)',
+
+    'settings.anchorScheme.name': 'Anchor Scheme',
+    'settings.anchorScheme.desc': 'Select the anchor point layout scheme for textboxes',
+    'settings.anchorScheme.scheme1': 'Scheme 1: Corners + Edge Midpoints (8 anchors)',
+    'settings.anchorScheme.scheme2': 'Scheme 2: Edge Midpoints + Quarter Points (12 anchors)',
+    'settings.snapPreviewRadius.name': 'Snap Preview Circle Size',
+    'settings.snapPreviewRadius.desc': 'Size of the snap preview circle in arrow insert mode (4-20px)',
 
     // Notices
     'notice.emptyCanvas': 'Canvas is empty, nothing to export',

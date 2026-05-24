@@ -28,6 +28,7 @@ export interface TextBoxData {
     fontSize?: number;
     writingMode?: 'horizontal-tb' | 'vertical-rl';
     shape?: TextboxShape;
+    locked?: boolean;
 }
 
 export type TextboxShape = 'rectangle' | 'ellipse' | 'diamond';
@@ -37,7 +38,11 @@ export interface ArrowConnection {
     anchor: AnchorType;
 }
 
-export type AnchorType = 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
+export type AnchorType = 'top' | 'bottom' | 'left' | 'right' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right'
+    | 'top-q1' | 'top-q2' | 'bottom-q1' | 'bottom-q2'
+    | 'left-q1' | 'left-q2' | 'right-q1' | 'right-q2';
+
+export type AnchorScheme = 'scheme1' | 'scheme2';
 
 export interface FreePoint {
     x: number;

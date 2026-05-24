@@ -1,6 +1,9 @@
 import { t } from './locale';
+import { AnchorScheme } from './types';
 
 export type ArrowShape = 'triangle' | 'open-triangle' | 'v-shape' | 'circle';
+
+export type { AnchorScheme };
 
 export function getArrowShapes(): { value: ArrowShape; label: string }[] {
     return [
@@ -85,6 +88,8 @@ export interface SimpleDrawSettings {
     snapEnabled: boolean;
     showAnchorDots: boolean;
     textboxDefaultFontSize: number;
+    anchorScheme: AnchorScheme;
+    snapPreviewRadius: number;
 }
 
 export const DEFAULT_SETTINGS: SimpleDrawSettings = {
@@ -98,4 +103,6 @@ export const DEFAULT_SETTINGS: SimpleDrawSettings = {
     snapEnabled: true,
     showAnchorDots: false,
     textboxDefaultFontSize: 16,
+    anchorScheme: 'scheme1',
+    snapPreviewRadius: 8,
 };

@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { SimpleDrawSettings, getArrowShapes, ArrowShape, ShortcutBinding, getShortcutActions, TextShortcutAction, bindingLabel } from './settings';
+import { SimpleDrawSettings, getArrowShapes, ArrowShape, AnchorScheme, ShortcutBinding, getShortcutActions, TextShortcutAction, bindingLabel } from './settings';
 import type SimpleDrawPlugin from './main';
 import { t, setLanguage, Language } from './locale';
 
@@ -95,6 +95,35 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
                 .setValue(this.plugin.settings.showAnchorDots)
                 .onChange(async (value) => {
                     this.plugin.settings.showAnchorDots = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        // --- Snap settings ---
+        const snapSection = this.createCollapsibleSection(containerEl, t('settings.section.snap'), true);
+        const snapBody = snapSection.body;
+
+        new Setting(snapBody)
+            .setName(t('settings.anchorScheme.name'))
+            .setDesc(t('settings.anchorScheme.desc'))
+            .addDropdown(dropdown => {
+                dropdown.addOption('scheme1', t('settings.anchorScheme.scheme1'));
+                dropdown.addOption('scheme2', t('settings.anchorScheme.scheme2'));
+                dropdown.setValue(this.plugin.settings.anchorScheme);
+                dropdown.onChange(async (value) => {
+                    this.plugin.settings.anchorScheme = value as AnchorScheme;
+                    await this.plugin.saveSettings();
+                });
+            });
+
+        new Setting(snapBody)
+            .setName(t('settings.snapPreviewRadius.name'))
+            .setDesc(t('settings.snapPreviewRadius.desc'))
+            .addSlider(slider => slider
+                .setLimits(4, 20, 2)
+                .setValue(this.plugin.settings.snapPreviewRadius)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                    this.plugin.settings.snapPreviewRadius = value;
                     await this.plugin.saveSettings();
                 }));
 
