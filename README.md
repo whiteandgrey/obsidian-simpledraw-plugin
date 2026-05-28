@@ -48,10 +48,14 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
    Snapped arrows automatically follow anchor movement.
 4. **双击箭头**弹出菜单：
    **Double-click an arrow** to open its menu:
-   - 首尾箭头显隐切换 / Start & End arrow toggle
-   - 实线/虚线切换 / Solid & Dashed toggle
-   - **T** 文字标签开关 / Label toggle
-   - 删除 / Delete
+    - 首尾箭头显隐切换
+    - Start & End arrow toggle
+    - 实线/虚线切换
+    - Solid & Dashed toggle
+    - **T** 文字标签开关
+    - Label toggle
+    - 删除
+    - Delete
 5. 方向可通过菜单选择或键盘方向键 **←↑↓→** 切换。
    Direction can be set via the menu or arrow keys.
 
@@ -67,11 +71,18 @@ Toggle to hide/show (content is preserved). Shows a placeholder when empty.
 ### 选择与编辑
 ### Selection & Editing
 
-**选择 Select**：单击 / Ctrl+单击多选 / 拖拽框选。Click / Ctrl+click / drag box select.
-**复制粘贴 Copy/Paste**：Ctrl+C / Ctrl+V，支持跨文件。Cross-file support.
-**外部文本 External Text**：复制文字后到画板 Ctrl+V 自动创建文本框。Paste external text to create a textbox.
-**删除 Delete**：选中后按 Delete。Select and press Delete.
-**撤销 Undo**：Ctrl+Z。**重做 Redo**：Ctrl+Shift+Z。
+**选择**：单击 / Ctrl+单击多选 / 拖拽框选。
+**Select**: Click / Ctrl+click / drag box select.
+**复制粘贴**：Ctrl+C / Ctrl+V，支持跨文件。
+**Copy/Paste**: Ctrl+C / Ctrl+V, cross-file support.
+**外部文本**：复制文字后到画板 Ctrl+V 自动创建文本框。
+**External Text**: Paste external text on canvas to create a textbox.
+**删除**：选中后按 Delete。
+**Delete**: Select and press Delete.
+**撤销**：Ctrl+Z。
+**Undo**: Ctrl+Z.
+**重做**：Ctrl+Shift+Z。
+**Redo**: Ctrl+Shift+Z.
 
 ### 锚点方案
 ### Anchor Scheme
