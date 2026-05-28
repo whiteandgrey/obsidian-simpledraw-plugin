@@ -10,9 +10,6 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 ## 使用教程
 ## Usage Guide
 
-操作说明书详见 [`asets/基本操作说明书.md`](asets/基本操作说明书.md)<br>
-Full text manual at [`asets/基本操作说明书.md`](asets/基本操作说明书.md)
-
 ### 画板操作
 ### Canvas
 
