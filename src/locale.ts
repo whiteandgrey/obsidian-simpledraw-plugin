@@ -113,8 +113,13 @@ const zh: Record<string, string> = {
     'arrowEditor.toggleDash': '实线/虚线切换',
     'arrowEditor.toggleLabel': '文字框开关切换',
     'arrowEditor.delete': '删除',
+
+    // Arrow label editor
     'arrowLabelEditor.confirm': '确认',
     'arrowLabelEditor.placeholder': '请输入 markdown 文本',
+    'arrowLabelEditor.position.overlap': '重叠',
+    'arrowLabelEditor.position.above': '上移',
+    'arrowLabelEditor.position.below': '下移',
 
     // Export modal
     'export.title': '导出为 PNG',
@@ -249,6 +254,9 @@ const en: Record<string, string> = {
     'arrowEditor.delete': 'Delete',
     'arrowLabelEditor.confirm': 'Done',
     'arrowLabelEditor.placeholder': 'Enter markdown text',
+    'arrowLabelEditor.position.overlap': 'Overlap',
+    'arrowLabelEditor.position.above': 'Above',
+    'arrowLabelEditor.position.below': 'Below',
 
     // Export modal
     'export.title': 'Export as PNG',

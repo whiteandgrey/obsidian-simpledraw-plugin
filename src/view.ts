@@ -551,11 +551,13 @@ export class SimpleDrawView extends TextFileView {
         const target = e.target as HTMLElement;
 
         // Skip clicks on menu or editor overlays (including textarea inside editor)
+        // BUT allow clicks on label text and label resize handles to pass through
         if (target !== this.containerEl && target !== this.viewportEl &&
+            !target.closest('.simpledraw-label-resize-handle') &&
+            !target.closest('[data-arrow-label-id]') &&
             (target.closest('.simpledraw-menu') ||
              target.closest('.simpledraw-textbox-editor') ||
              target.closest('.simpledraw-arrow-editor') ||
-             target.closest('.simpledraw-arrow-label') ||
              target.closest('.simpledraw-arrow-label-editor'))) {
             return;
         }
@@ -702,6 +704,50 @@ export class SimpleDrawView extends TextFileView {
             }
         }
 
+        // Check arrow label resize handles
+        const labelHandle = (e.target as HTMLElement).closest('[data-label-handle-id]') as HTMLElement | null;
+        if (labelHandle) {
+            const arrowId = labelHandle.dataset.labelHandleId!;
+            const handle = labelHandle.dataset.handle!;
+            const arrow = this.engine.data.elements.find(
+                e => e.id === arrowId && e.type === 'arrow'
+            ) as ArrowData | undefined;
+            if (arrow && this.engine.selectedIds.has(arrowId)) {
+                // 读取标签 DOM 实际渲染尺寸用于增量缩放
+                const labelDom = this.elementsLayer.querySelector(
+                    `[data-arrow-label-id="${arrowId}"]`) as HTMLElement | null;
+                const zoom = this.engine.data.viewState.zoom;
+                const curW = labelDom ? labelDom.getBoundingClientRect().width / zoom : (arrow.labelWidth ?? 120);
+                const curH = labelDom ? labelDom.getBoundingClientRect().height / zoom : (arrow.labelHeight ?? 30);
+                this.engine.dragging = {
+                    type: 'label-resize',
+                    arrowId: arrowId,
+                    startMouseX: pos.x,
+                    startMouseY: pos.y,
+                    startX: 0,
+                    startY: 0,
+                    startWidth: curW,
+                    startHeight: curH,
+                    resizeHandle: handle,
+                };
+                this.containerEl.style.cursor = 'nwse-resize';
+                return;
+            }
+        }
+
+        // 点击标签文本区域 → 直接选中箭头（不启动 MOVE），使手柄立即出现
+        if (!labelHandle) {
+            const labelHit = (e.target as HTMLElement).closest('[data-arrow-label-id]') as HTMLElement | null;
+            if (labelHit) {
+                const arrowId = labelHit.dataset.arrowLabelId!;
+                if (!this.engine.selectedIds.has(arrowId)) {
+                    this.engine.selectElement(arrowId, additive);
+                }
+                this.requestRender();
+                return;
+            }
+        }
+
         // Check if clicking on an element
         const clickedEl = this.engine.getElementAt(pos.x, pos.y);
 
@@ -822,6 +868,24 @@ export class SimpleDrawView extends TextFileView {
                 if (this.settings.snapEnabled && handle) {
                     this.engine.computeResizeSnap(el.id, handle);
                 }
+                this.engine.notifyChange();
+                this.requestRender();
+            }
+            return;
+        }
+
+        // Arrow label resize (symmetric around midpoint, delta-based with 2x factor)
+        if (this.engine.dragging?.type === 'label-resize' && this.engine.dragging.arrowId) {
+            const arrow = this.engine.data.elements.find(
+                e => e.id === this.engine.dragging!.arrowId && e.type === 'arrow'
+            ) as ArrowData | undefined;
+            if (arrow && this.engine.dragging.startWidth != null && this.engine.dragging.startHeight != null) {
+                const dx = canvasPos.x - this.engine.dragging.startMouseX;
+                const dy = canvasPos.y - this.engine.dragging.startMouseY;
+                const origW = this.engine.dragging.startWidth;
+                const origH = this.engine.dragging.startHeight;
+                arrow.labelWidth = Math.max(30, origW + 2 * dx);
+                arrow.labelHeight = Math.max(12, origH + 2 * dy);
                 this.engine.notifyChange();
                 this.requestRender();
             }
@@ -974,8 +1038,7 @@ export class SimpleDrawView extends TextFileView {
 
         // Delete selected
         if (e.key === 'Delete' || e.key === 'Backspace') {
-            if (this.engine.editingTextboxId) return; // Don't delete when editing text
-            if (this.engine.editingArrowId) return;
+            if (this.engine.editingTextboxId || this.engine.editingArrowId || this.labelEditorArrowId) return;
             if (this.engine.selectedIds.size > 0) {
                 this.engine.deleteElements(this.engine.selectedIds);
                 this.closeEditors();
@@ -1284,7 +1347,7 @@ export class SimpleDrawView extends TextFileView {
         const textarea = this.textboxEditorEl.createEl('textarea');
         textarea.style.width = '100%';
         textarea.style.minHeight = '100px';
-        textarea.style.resize = 'vertical';
+        textarea.style.resize = 'both';
         textarea.style.border = '1px solid var(--background-modifier-border)';
         textarea.style.borderRadius = '4px';
         textarea.style.padding = '6px';
@@ -1311,6 +1374,9 @@ export class SimpleDrawView extends TextFileView {
         // Live preview: re-render textbox as user types
         textarea.addEventListener('input', () => {
             el.content = textarea.value;
+            // Auto-grow textarea to fit content
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
             this.requestRender();
         });
 
@@ -1542,7 +1608,7 @@ export class SimpleDrawView extends TextFileView {
         this.labelEditorEl.style.padding = '8px';
         this.labelEditorEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
         this.labelEditorEl.style.minWidth = '200px';
-        this.labelEditorEl.style.maxWidth = '350px';
+        this.labelEditorEl.style.maxWidth = '500px';
 
         const viewRect = this.containerEl.getBoundingClientRect();
         let left = Math.max(0, screen.x - 100);
@@ -1554,7 +1620,7 @@ export class SimpleDrawView extends TextFileView {
         this.labelEditorEl.style.left = left + 'px';
         this.labelEditorEl.style.top = top + 'px';
 
-        // Toolbar: font size
+        // Toolbar: font size + position + confirm
         const toolbar = this.labelEditorEl.createDiv('simpledraw-editor-toolbar');
         toolbar.style.display = 'flex';
         toolbar.style.gap = '4px';
@@ -1576,7 +1642,6 @@ export class SimpleDrawView extends TextFileView {
         shrinkBtn.addEventListener('click', () => {
             arrow.labelFontSize = Math.max(8, (arrow.labelFontSize ?? 16) - 2);
             updateSizeDisplay();
-            textarea.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
             this.engine.saveHistory();
             this.engine.notifyChange();
             this.requestRender();
@@ -1587,7 +1652,6 @@ export class SimpleDrawView extends TextFileView {
         growBtn.addEventListener('click', () => {
             arrow.labelFontSize = Math.min(72, (arrow.labelFontSize ?? 16) + 2);
             updateSizeDisplay();
-            textarea.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
             this.engine.saveHistory();
             this.engine.notifyChange();
             this.requestRender();
@@ -1598,7 +1662,6 @@ export class SimpleDrawView extends TextFileView {
         resetBtn.addEventListener('click', () => {
             arrow.labelFontSize = 16;
             updateSizeDisplay();
-            textarea.style.fontSize = 'var(--font-text-size)';
             this.engine.saveHistory();
             this.engine.notifyChange();
             this.requestRender();
@@ -1606,6 +1669,30 @@ export class SimpleDrawView extends TextFileView {
         toolbar.appendChild(resetBtn);
 
         toolbar.appendChild(sizeDisplay);
+
+        // Position toggle buttons
+        const positions: Array<{ key: 'overlap' | 'above' | 'below'; icon: string }> = [
+            { key: 'overlap', icon: '⊥' },
+            { key: 'above', icon: '↑' },
+            { key: 'below', icon: '↓' },
+        ];
+        const currentPos = arrow.labelPosition ?? 'overlap';
+        for (const p of positions) {
+            const posBtn = this.createSmallButton(p.icon, t('arrowLabelEditor.position.' + p.key));
+            posBtn.style.marginLeft = p.key === 'overlap' ? '8px' : '0';
+            if (p.key === currentPos) {
+                posBtn.style.background = 'var(--interactive-accent)';
+                posBtn.style.color = 'var(--text-on-accent)';
+            }
+            posBtn.addEventListener('click', () => {
+                arrow.labelPosition = p.key;
+                this.engine.saveHistory();
+                this.engine.notifyChange();
+                this.requestRender();
+                this.startArrowLabelEditor(id);
+            });
+            toolbar.appendChild(posBtn);
+        }
 
         // Confirm button
         const confirmBtn = this.createSmallButton('✓', t('arrowLabelEditor.confirm'));
@@ -1622,7 +1709,7 @@ export class SimpleDrawView extends TextFileView {
         const textarea = this.labelEditorEl.createEl('textarea');
         textarea.style.width = '100%';
         textarea.style.minHeight = '60px';
-        textarea.style.resize = 'vertical';
+        textarea.style.resize = 'both';
         textarea.style.border = '1px solid var(--background-modifier-border)';
         textarea.style.borderRadius = '4px';
         textarea.style.padding = '6px';
@@ -1645,6 +1732,9 @@ export class SimpleDrawView extends TextFileView {
 
         textarea.addEventListener('input', () => {
             arrow.labelContent = textarea.value;
+            // Auto-grow textarea to fit content
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
             this.requestRender();
         });
 
@@ -1930,6 +2020,7 @@ export class SimpleDrawView extends TextFileView {
             validArrowIds.add(arrow.id);
 
             const mid = this.engine.getArrowMidpoint(arrow);
+            const offset = this.engine.getLabelOffset(arrow, arrow.labelPosition ?? 'overlap');
             let labelEl = this.elementsLayer.querySelector(`[data-arrow-label-id="${arrow.id}"]`) as HTMLElement | null;
             if (!labelEl) {
                 labelEl = this.elementsLayer.createDiv('simpledraw-arrow-label');
@@ -1944,8 +2035,8 @@ export class SimpleDrawView extends TextFileView {
                 labelEl.style.textAlign = 'center';
                 labelEl.style.cursor = 'pointer';
                 labelEl.style.zIndex = '22';
-                labelEl.style.maxWidth = '200px';
                 labelEl.style.wordBreak = 'break-word';
+                labelEl.style.boxSizing = 'border-box';
 
                 const content = labelEl.createDiv('simpledraw-arrow-label-content');
                 content.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
@@ -1954,8 +2045,24 @@ export class SimpleDrawView extends TextFileView {
                 labelEl.appendChild(content);
             }
 
-            labelEl.style.left = mid.x + 'px';
-            labelEl.style.top = mid.y + 'px';
+            labelEl.style.left = (mid.x + offset.x) + 'px';
+            labelEl.style.top = (mid.y + offset.y) + 'px';
+
+            // Apply explicit width/height if set
+            if (arrow.labelWidth) {
+                labelEl.style.width = arrow.labelWidth + 'px';
+                labelEl.style.maxWidth = 'none';
+            } else {
+                labelEl.style.width = '';
+                labelEl.style.maxWidth = '200px';
+            }
+            if (arrow.labelHeight) {
+                labelEl.style.height = arrow.labelHeight + 'px';
+                labelEl.style.overflow = 'hidden';
+            } else {
+                labelEl.style.height = '';
+                labelEl.style.overflow = 'visible';
+            }
 
             const contentEl = labelEl.querySelector('.simpledraw-arrow-label-content') as HTMLElement;
             if (contentEl) {
@@ -1973,6 +2080,37 @@ export class SimpleDrawView extends TextFileView {
                     }
                 }
                 contentEl.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+            }
+
+            // Resize handles (only when arrow is selected and not actively in label editor)
+            const isSelected = this.engine.selectedIds.has(arrow.id);
+            const isEditingLabel = (this.labelEditorArrowId === arrow.id);
+            if (isSelected && !isEditingLabel) {
+                const handles = labelEl.querySelectorAll('.simpledraw-label-resize-handle');
+                if (handles.length === 0) {
+                    for (const pos of ['se', 'sw', 'ne', 'nw']) {
+                        const h = document.createElement('div');
+                        h.className = 'simpledraw-label-resize-handle';
+                        h.dataset.labelHandleId = arrow.id;
+                        h.dataset.handle = pos;
+                        h.style.position = 'absolute';
+                        h.style.width = '8px';
+                        h.style.height = '8px';
+                        h.style.background = 'var(--interactive-accent)';
+                        h.style.cursor = pos === 'se' || pos === 'nw' ? 'nwse-resize' : 'nesw-resize';
+                        h.style.zIndex = '10';
+                        h.style.pointerEvents = 'auto';
+                        switch (pos) {
+                            case 'se': h.style.bottom = '-4px'; h.style.right = '-4px'; break;
+                            case 'sw': h.style.bottom = '-4px'; h.style.left = '-4px'; break;
+                            case 'ne': h.style.top = '-4px'; h.style.right = '-4px'; break;
+                            case 'nw': h.style.top = '-4px'; h.style.left = '-4px'; break;
+                        }
+                        labelEl.appendChild(h);
+                    }
+                }
+            } else {
+                labelEl.querySelectorAll('.simpledraw-label-resize-handle').forEach(h => h.remove());
             }
         }
         // Remove stale label elements
@@ -2192,6 +2330,7 @@ export class SimpleDrawView extends TextFileView {
             container.style.borderRadius = '50%';
             container.style.clipPath = 'none';
             container.style.overflow = '';
+            wrapper.style.borderRadius = '50%';
         } else if (shape === 'diamond') {
             container.style.borderRadius = '0';
             container.style.clipPath = 'polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)';

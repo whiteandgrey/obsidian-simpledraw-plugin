@@ -47,7 +47,7 @@ export class SimpleDrawEngine {
 
     // Drag state
     public dragging: {
-        type: 'move' | 'resize' | 'pan';
+        type: 'move' | 'resize' | 'pan' | 'label-resize';
         elementIds?: Set<string>;
         startMouseX: number;
         startMouseY: number;
@@ -57,6 +57,7 @@ export class SimpleDrawEngine {
         startHeight?: number;
         resizeHandle?: string;
         textboxId?: string;
+        arrowId?: string;
     } | null = null;
 
     // Undo/redo
@@ -617,6 +618,39 @@ export class SimpleDrawEngine {
             acc += segLens[i];
         }
         return { x: points[points.length - 1].x, y: points[points.length - 1].y };
+    }
+
+    getLabelOffset(arrow: ArrowData, position: 'overlap' | 'above' | 'below'): { x: number; y: number } {
+        if (position === 'overlap') return { x: 0, y: 0 };
+        const points = this.buildArrowPath(arrow.startConnection, arrow.endConnection, arrow.arrowDirection);
+        if (points.length < 2) return { x: 0, y: 0 };
+
+        let totalLen = 0;
+        const segLens: number[] = [];
+        for (let i = 1; i < points.length; i++) {
+            const dx = points[i].x - points[i - 1].x;
+            const dy = points[i].y - points[i - 1].y;
+            segLens.push(Math.sqrt(dx * dx + dy * dy));
+            totalLen += segLens[segLens.length - 1];
+        }
+        if (totalLen === 0) return { x: 0, y: 0 };
+
+        const halfLen = totalLen / 2;
+        let acc = 0;
+        for (let i = 0; i < segLens.length; i++) {
+            if (acc + segLens[i] >= halfLen) {
+                const segmentDx = points[i + 1].x - points[i].x;
+                const segmentDy = points[i + 1].y - points[i].y;
+                const len = segLens[i];
+                const offset = 15;
+                const nx = segmentDy / len;
+                const ny = -segmentDx / len;
+                if (position === 'above') return { x: nx * offset, y: ny * offset };
+                if (position === 'below') return { x: -nx * offset, y: -ny * offset };
+            }
+            acc += segLens[i];
+        }
+        return { x: 0, y: 0 };
     }
 
     getAnchors(textbox: TextBoxData): { anchor: AnchorType; x: number; y: number }[] {

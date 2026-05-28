@@ -62,6 +62,9 @@ export interface ArrowData {
     labelVisible?: boolean;
     labelFontSize?: number;
     labelWritingMode?: 'horizontal-tb' | 'vertical-rl';
+    labelPosition?: 'overlap' | 'above' | 'below';
+    labelWidth?: number;
+    labelHeight?: number;
 }
 
 export type ArrowDirection = 'left' | 'right' | 'up' | 'down';
