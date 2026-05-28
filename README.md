@@ -25,8 +25,6 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 ### 文本框
 ### Textbox
 
-![](https://github.com/whiteandgrey/obsidian-simpledraw-plugin/blob/main/assets/%E7%94%BB%E6%9D%BF%E5%9F%BA%E6%9C%AC%E6%93%8D%E4%BD%9C.gif?raw=true)
-
 ![gif](assets/插入文本框元素并编辑.gif)
 
 1. 点击左上角 **T** 按钮，在画板点击两次确定位置。<br>
