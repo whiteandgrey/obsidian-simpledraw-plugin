@@ -1356,6 +1356,9 @@ export class SimpleDrawView extends TextFileView {
         textarea.style.fontFamily = 'var(--font-text)';
         textarea.style.fontSize = (this.settings.textboxDefaultFontSize ?? 16) + 'px';
         textarea.value = el.content;
+        // Immediately grow to fit existing content
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
 
         textarea.focus();
 
@@ -1718,6 +1721,9 @@ export class SimpleDrawView extends TextFileView {
         textarea.style.fontFamily = 'var(--font-text)';
         textarea.style.fontSize = 'var(--font-text-size)';
         textarea.value = arrow.labelContent ?? '';
+        // Immediately grow to fit existing content
+        textarea.style.height = 'auto';
+        textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
         textarea.placeholder = t('arrowLabelEditor.placeholder');
         textarea.focus();
 
@@ -2034,7 +2040,6 @@ export class SimpleDrawView extends TextFileView {
                 labelEl.style.padding = '2px 4px';
                 labelEl.style.textAlign = 'center';
                 labelEl.style.cursor = 'pointer';
-                labelEl.style.zIndex = '22';
                 labelEl.style.wordBreak = 'break-word';
                 labelEl.style.boxSizing = 'border-box';
 
@@ -2080,6 +2085,25 @@ export class SimpleDrawView extends TextFileView {
                     }
                 }
                 contentEl.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+            }
+
+            // Reposition label in DOM to match its arrow's z-order
+            const connectedTextboxIds: string[] = [];
+            if ('elementId' in arrow.startConnection) connectedTextboxIds.push(arrow.startConnection.elementId);
+            if ('elementId' in arrow.endConnection) connectedTextboxIds.push(arrow.endConnection.elementId);
+            if (connectedTextboxIds.length > 0) {
+                let maxIdx = -1;
+                let insertAfter: Element | null = null;
+                for (const id of connectedTextboxIds) {
+                    const idx = this.engine.data.elements.findIndex(e => e.id === id);
+                    if (idx > maxIdx) {
+                        maxIdx = idx;
+                        insertAfter = this.elementsLayer.querySelector(`[data-id="${id}"]`);
+                    }
+                }
+                if (insertAfter && insertAfter.parentNode) {
+                    insertAfter.parentNode.insertBefore(labelEl, insertAfter.nextSibling);
+                }
             }
 
             // Resize handles (only when arrow is selected and not actively in label editor)

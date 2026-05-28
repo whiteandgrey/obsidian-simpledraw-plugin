@@ -227,7 +227,6 @@
     padding: 2px 4px;
     text-align: center;
     cursor: pointer;
-    z-index: 22;
     max-width: 200px;
     word-break: break-word;
 }
