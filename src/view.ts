@@ -31,6 +31,8 @@ export class SimpleDrawView extends TextFileView {
     public menuEl: HTMLElement;
     public textboxEditorEl: HTMLElement | null = null;
     public arrowEditorEl: HTMLElement | null = null;
+    public labelEditorArrowId: string | null = null;
+    public labelEditorEl: HTMLElement | null = null;
 
     // Menu buttons
     public btnInsertTextbox: HTMLElement;
@@ -552,7 +554,9 @@ export class SimpleDrawView extends TextFileView {
         if (target !== this.containerEl && target !== this.viewportEl &&
             (target.closest('.simpledraw-menu') ||
              target.closest('.simpledraw-textbox-editor') ||
-             target.closest('.simpledraw-arrow-editor'))) {
+             target.closest('.simpledraw-arrow-editor') ||
+             target.closest('.simpledraw-arrow-label') ||
+             target.closest('.simpledraw-arrow-label-editor'))) {
             return;
         }
 
@@ -898,6 +902,17 @@ export class SimpleDrawView extends TextFileView {
     }
 
     onDblClick(e: MouseEvent): void {
+        // Check if double-clicked on arrow label
+        const target = e.target as HTMLElement;
+        const labelEl = target.closest('[data-arrow-label-id]') as HTMLElement | null;
+        if (labelEl) {
+            const arrowId = labelEl.dataset.arrowLabelId;
+            if (arrowId) {
+                this.startArrowLabelEditor(arrowId);
+                return;
+            }
+        }
+
         const canvasPos = this.engine.screenToCanvas(e.clientX, e.clientY);
         const el = this.engine.getElementAt(canvasPos.x, canvasPos.y);
         if (el && el.type === 'textbox') {
@@ -971,21 +986,21 @@ export class SimpleDrawView extends TextFileView {
 
         // Undo/Redo
         if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) {
-            if (this.engine.editingTextboxId || this.engine.editingArrowId) return;
+            if (this.engine.editingTextboxId || this.engine.editingArrowId || this.labelEditorArrowId) return;
             e.preventDefault();
             this.engine.undo();
             this.rebuildAll();
             return;
         }
         if ((e.ctrlKey || e.metaKey) && e.key === 'z' && e.shiftKey) {
-            if (this.engine.editingTextboxId || this.engine.editingArrowId) return;
+            if (this.engine.editingTextboxId || this.engine.editingArrowId || this.labelEditorArrowId) return;
             e.preventDefault();
             this.engine.redo();
             this.rebuildAll();
             return;
         }
         if ((e.ctrlKey || e.metaKey) && (e.key === 'Z')) {
-            if (this.engine.editingTextboxId || this.engine.editingArrowId) return;
+            if (this.engine.editingTextboxId || this.engine.editingArrowId || this.labelEditorArrowId) return;
             e.preventDefault();
             this.engine.redo();
             this.rebuildAll();
@@ -1000,7 +1015,7 @@ export class SimpleDrawView extends TextFileView {
 
         // Copy selected elements
         if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-            if (this.engine.editingTextboxId || this.engine.editingArrowId) return;
+            if (this.engine.editingTextboxId || this.engine.editingArrowId || this.labelEditorArrowId) return;
             if (this.engine.selectedIds.size > 0) {
                 e.preventDefault();
                 this.copySelectedElements();
@@ -1010,7 +1025,7 @@ export class SimpleDrawView extends TextFileView {
 
         // Paste elements or clipboard text
         if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-            if (this.engine.editingTextboxId || this.engine.editingArrowId) return;
+            if (this.engine.editingTextboxId || this.engine.editingArrowId || this.labelEditorArrowId) return;
             e.preventDefault();
             this.pasteFromClipboard();
             return;
@@ -1418,8 +1433,27 @@ export class SimpleDrawView extends TextFileView {
         });
         this.arrowEditorEl.appendChild(dashBtn);
 
+        // Label toggle
+        const labelBtn = this.createSmallButton(el.labelVisible ? 'T' : 'T', t('arrowEditor.toggleLabel'));
+        labelBtn.addEventListener('click', () => {
+            el.labelVisible = !el.labelVisible;
+            if (el.labelVisible && !el.labelContent) {
+                el.labelContent = '';
+                this.engine.saveHistory();
+                this.engine.notifyChange();
+                this.engine.editingArrowId = id;
+                this.closeEditors();
+                this.startArrowLabelEditor(id);
+                return;
+            }
+            this.engine.saveHistory();
+            this.engine.notifyChange();
+            this.requestRender();
+        });
+        this.arrowEditorEl.appendChild(labelBtn);
+
         // Delete button
-        const delBtn = this.createSmallButton('🗑', t('arrowEditor.delete'));
+        const delBtn = this.createSmallButton('✕', t('arrowEditor.delete'));
         delBtn.addEventListener('click', () => {
             this.engine.deleteElement(id);
             this.closeEditors();
@@ -1458,8 +1492,163 @@ export class SimpleDrawView extends TextFileView {
             this.arrowEditorEl.remove();
             this.arrowEditorEl = null;
         }
+        // Save label editor content
+        if (this.labelEditorEl && this.labelEditorArrowId) {
+            const textarea = this.labelEditorEl.querySelector('textarea') as HTMLTextAreaElement | null;
+            if (textarea) {
+                const arrow = this.engine.data.elements.find(
+                    e => e.id === this.labelEditorArrowId && e.type === 'arrow'
+                ) as ArrowData | undefined;
+                if (arrow) {
+                    const newContent = textarea.value;
+                    if (arrow.labelContent !== newContent) {
+                        arrow.labelContent = newContent;
+                        this.engine.saveHistory();
+                        this.engine.notifyChange();
+                    }
+                    if (!textarea.value.trim()) {
+                        arrow.labelVisible = false;
+                        this.engine.saveHistory();
+                        this.engine.notifyChange();
+                    }
+                }
+            }
+        }
+        if (this.labelEditorEl) {
+            this.labelEditorEl.remove();
+            this.labelEditorEl = null;
+        }
         this.engine.editingTextboxId = null;
         this.engine.editingArrowId = null;
+        this.labelEditorArrowId = null;
+    }
+
+    startArrowLabelEditor(id: string): void {
+        const arrow = this.engine.data.elements.find(e => e.id === id && e.type === 'arrow') as ArrowData | undefined;
+        if (!arrow) return;
+
+        this.closeEditors();
+        this.labelEditorArrowId = id;
+
+        const mid = this.engine.getArrowMidpoint(arrow);
+        const screen = this.engine.canvasToScreen(mid.x, mid.y);
+
+        this.labelEditorEl = this.containerEl.createDiv('simpledraw-arrow-label-editor');
+        this.labelEditorEl.style.position = 'absolute';
+        this.labelEditorEl.style.zIndex = '200';
+        this.labelEditorEl.style.background = 'var(--background-primary)';
+        this.labelEditorEl.style.border = '2px solid var(--interactive-accent)';
+        this.labelEditorEl.style.borderRadius = '4px';
+        this.labelEditorEl.style.padding = '8px';
+        this.labelEditorEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
+        this.labelEditorEl.style.minWidth = '200px';
+        this.labelEditorEl.style.maxWidth = '350px';
+
+        const viewRect = this.containerEl.getBoundingClientRect();
+        let left = Math.max(0, screen.x - 100);
+        let top = screen.y + 10;
+        if (top + 180 > viewRect.height) {
+            top = screen.y - 180;
+        }
+        top = Math.max(0, top);
+        this.labelEditorEl.style.left = left + 'px';
+        this.labelEditorEl.style.top = top + 'px';
+
+        // Toolbar: font size
+        const toolbar = this.labelEditorEl.createDiv('simpledraw-editor-toolbar');
+        toolbar.style.display = 'flex';
+        toolbar.style.gap = '4px';
+        toolbar.style.marginBottom = '8px';
+        toolbar.style.alignItems = 'center';
+
+        const sizeDisplay = toolbar.createSpan();
+        sizeDisplay.textContent = (arrow.labelFontSize ?? 16) + 'px';
+        sizeDisplay.style.fontSize = '12px';
+        sizeDisplay.style.color = 'var(--text-muted)';
+        sizeDisplay.style.minWidth = '30px';
+        sizeDisplay.style.textAlign = 'right';
+
+        const updateSizeDisplay = () => {
+            sizeDisplay.textContent = (arrow.labelFontSize ?? 16) + 'px';
+        };
+
+        const shrinkBtn = this.createSmallButton('A-', t('textboxEditor.fontSize.shrink'));
+        shrinkBtn.addEventListener('click', () => {
+            arrow.labelFontSize = Math.max(8, (arrow.labelFontSize ?? 16) - 2);
+            updateSizeDisplay();
+            textarea.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+            this.engine.saveHistory();
+            this.engine.notifyChange();
+            this.requestRender();
+        });
+        toolbar.appendChild(shrinkBtn);
+
+        const growBtn = this.createSmallButton('A+', t('textboxEditor.fontSize.grow'));
+        growBtn.addEventListener('click', () => {
+            arrow.labelFontSize = Math.min(72, (arrow.labelFontSize ?? 16) + 2);
+            updateSizeDisplay();
+            textarea.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+            this.engine.saveHistory();
+            this.engine.notifyChange();
+            this.requestRender();
+        });
+        toolbar.appendChild(growBtn);
+
+        const resetBtn = this.createSmallButton('R', t('textboxEditor.fontSize.reset'));
+        resetBtn.addEventListener('click', () => {
+            arrow.labelFontSize = 16;
+            updateSizeDisplay();
+            textarea.style.fontSize = 'var(--font-text-size)';
+            this.engine.saveHistory();
+            this.engine.notifyChange();
+            this.requestRender();
+        });
+        toolbar.appendChild(resetBtn);
+
+        toolbar.appendChild(sizeDisplay);
+
+        // Confirm button
+        const confirmBtn = this.createSmallButton('✓', t('arrowLabelEditor.confirm'));
+        confirmBtn.style.marginLeft = 'auto';
+        confirmBtn.style.background = 'var(--interactive-accent)';
+        confirmBtn.style.color = 'var(--text-on-accent)';
+        confirmBtn.addEventListener('click', () => {
+            this.closeEditors();
+            this.requestRender();
+        });
+        toolbar.appendChild(confirmBtn);
+
+        // Textarea
+        const textarea = this.labelEditorEl.createEl('textarea');
+        textarea.style.width = '100%';
+        textarea.style.minHeight = '60px';
+        textarea.style.resize = 'vertical';
+        textarea.style.border = '1px solid var(--background-modifier-border)';
+        textarea.style.borderRadius = '4px';
+        textarea.style.padding = '6px';
+        textarea.style.background = 'var(--background-primary)';
+        textarea.style.color = 'var(--text-normal)';
+        textarea.style.fontFamily = 'var(--font-text)';
+        textarea.style.fontSize = 'var(--font-text-size)';
+        textarea.value = arrow.labelContent ?? '';
+        textarea.placeholder = t('arrowLabelEditor.placeholder');
+        textarea.focus();
+
+        textarea.addEventListener('keydown', (ev) => {
+            if (ev.key === 'Escape') {
+                ev.stopPropagation();
+                this.closeEditors();
+                this.requestRender();
+                return;
+            }
+        });
+
+        textarea.addEventListener('input', () => {
+            arrow.labelContent = textarea.value;
+            this.requestRender();
+        });
+
+        this.requestRender();
     }
 
     // --- Markdown Rendering ---
@@ -1731,6 +1920,68 @@ export class SimpleDrawView extends TextFileView {
             poly.setAttribute('stroke-linejoin', 'round');
             this.svgLayer.appendChild(poly);
         }
+
+        // Arrow labels
+        const validArrowIds = new Set<string>();
+        for (const el of this.engine.data.elements) {
+            if (el.type !== 'arrow') continue;
+            const arrow = el as ArrowData;
+            if (!arrow.labelVisible) continue;
+            validArrowIds.add(arrow.id);
+
+            const mid = this.engine.getArrowMidpoint(arrow);
+            let labelEl = this.elementsLayer.querySelector(`[data-arrow-label-id="${arrow.id}"]`) as HTMLElement | null;
+            if (!labelEl) {
+                labelEl = this.elementsLayer.createDiv('simpledraw-arrow-label');
+                labelEl.dataset.arrowLabelId = arrow.id;
+                labelEl.style.position = 'absolute';
+                labelEl.style.pointerEvents = 'auto';
+                labelEl.style.transform = 'translate(-50%, -50%)';
+                labelEl.style.background = 'transparent';
+                labelEl.style.border = 'none';
+                labelEl.style.borderRadius = '0';
+                labelEl.style.padding = '2px 4px';
+                labelEl.style.textAlign = 'center';
+                labelEl.style.cursor = 'pointer';
+                labelEl.style.zIndex = '22';
+                labelEl.style.maxWidth = '200px';
+                labelEl.style.wordBreak = 'break-word';
+
+                const content = labelEl.createDiv('simpledraw-arrow-label-content');
+                content.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+                content.style.lineHeight = '1.3';
+
+                labelEl.appendChild(content);
+            }
+
+            labelEl.style.left = mid.x + 'px';
+            labelEl.style.top = mid.y + 'px';
+
+            const contentEl = labelEl.querySelector('.simpledraw-arrow-label-content') as HTMLElement;
+            if (contentEl) {
+                const content = arrow.labelContent ?? '';
+                const rendered = contentEl.getAttribute('data-rendered') ?? '';
+                if (rendered !== content) {
+                    contentEl.empty();
+                    contentEl.setAttribute('data-rendered', content);
+                    if (content.trim()) {
+                        MarkdownRenderer.render(this.app, content, contentEl, this.file?.path ?? '', this);
+                    } else {
+                        contentEl.textContent = t('arrowLabelEditor.placeholder');
+                        contentEl.style.opacity = '0.5';
+                        contentEl.style.color = 'var(--text-muted)';
+                    }
+                }
+                contentEl.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+            }
+        }
+        // Remove stale label elements
+        this.elementsLayer.querySelectorAll('[data-arrow-label-id]').forEach(el => {
+            const id = (el as HTMLElement).dataset.arrowLabelId;
+            if (id && !validArrowIds.has(id)) {
+                el.remove();
+            }
+        });
     }
 
     drawArrowhead(tipX: number, tipY: number, fromX: number, fromY: number, color: string, size: number, reverse: boolean, parentSvg?: SVGElement): void {
@@ -2343,6 +2594,9 @@ export class SimpleDrawView extends TextFileView {
             newAr.showStartArrow = ar.showStartArrow;
             newAr.showEndArrow = ar.showEndArrow;
             if (ar.dashed) newAr.dashed = true;
+            if (ar.labelContent) newAr.labelContent = ar.labelContent;
+            if (ar.labelVisible) newAr.labelVisible = ar.labelVisible;
+            if (ar.labelFontSize) newAr.labelFontSize = ar.labelFontSize;
         }
 
         this.engine.selectedIds.clear();

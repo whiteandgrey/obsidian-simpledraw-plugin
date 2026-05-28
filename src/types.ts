@@ -58,6 +58,10 @@ export interface ArrowData {
     showEndArrow: boolean;
     arrowDirection: ArrowDirection;
     dashed?: boolean;
+    labelContent?: string;
+    labelVisible?: boolean;
+    labelFontSize?: number;
+    labelWritingMode?: 'horizontal-tb' | 'vertical-rl';
 }
 
 export type ArrowDirection = 'left' | 'right' | 'up' | 'down';

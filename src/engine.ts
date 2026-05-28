@@ -588,6 +588,37 @@ export class SimpleDrawEngine {
         return points;
     }
 
+    getArrowMidpoint(arrow: ArrowData): { x: number; y: number } {
+        const points = this.buildArrowPath(arrow.startConnection, arrow.endConnection, arrow.arrowDirection);
+        if (points.length < 2) return points[0] || { x: 0, y: 0 };
+
+        let totalLen = 0;
+        const segLens: number[] = [];
+        for (let i = 1; i < points.length; i++) {
+            const dx = points[i].x - points[i - 1].x;
+            const dy = points[i].y - points[i - 1].y;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            segLens.push(len);
+            totalLen += len;
+        }
+        if (totalLen === 0) return { x: points[0].x, y: points[0].y };
+
+        const halfLen = totalLen / 2;
+        let acc = 0;
+        for (let i = 0; i < segLens.length; i++) {
+            if (acc + segLens[i] >= halfLen) {
+                const rem = halfLen - acc;
+                const t = segLens[i] > 0 ? rem / segLens[i] : 0;
+                return {
+                    x: points[i].x + (points[i + 1].x - points[i].x) * t,
+                    y: points[i].y + (points[i + 1].y - points[i].y) * t,
+                };
+            }
+            acc += segLens[i];
+        }
+        return { x: points[points.length - 1].x, y: points[points.length - 1].y };
+    }
+
     getAnchors(textbox: TextBoxData): { anchor: AnchorType; x: number; y: number }[] {
         const scheme1Anchors: AnchorType[] = ['top-left', 'top', 'top-right', 'right', 'bottom-right', 'bottom', 'bottom-left', 'left'];
         const scheme2Anchors: AnchorType[] = [

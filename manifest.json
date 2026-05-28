@@ -1,7 +1,7 @@
 {
 	"id": "simple-draw",
 	"name": "SimpleDraw",
-	"version": "1.4.4",
+	"version": "1.5.1",
 	"minAppVersion": "0.15.0",
 	"description": "A lightweight drawing plugin for simple flowcharts.",
 	"author": "whiteandgrey",
