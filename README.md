@@ -14,7 +14,7 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 ### 画板操作
 ### Canvas
 
- ![](asets/画板基本操作.gif)
+ ![](assets/画板基本操作.gif)
 
 **移动**：鼠标中键拖拽<br>
 **Pan**: Middle-click drag
@@ -25,7 +25,7 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 ### 文本框
 ### Textbox
 
-![](asets/插入文本框元素并编辑.gif)
+![](assets/插入文本框元素并编辑.gif)
 
 1. 点击左上角 **T** 按钮，在画板点击两次确定位置。<br>
    Click the **T** button, then click twice on the canvas to place a textbox.
@@ -39,7 +39,7 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 ### 箭头
 ### Arrow
 
-![](asets/线段基本操作.gif)
+![](assets/线段基本操作.gif)
 
 1. 点击左上角 **→** 按钮，在画板点击起点和终点。<br>
    Click the **→** button, then click start and end points on the canvas.
