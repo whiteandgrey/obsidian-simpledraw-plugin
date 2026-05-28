@@ -1,6 +1,6 @@
 # SimpleDraw
 
-轻量级流程图绘制插件，在 Obsidian 中直接创建和编辑 `.simpledraw` 文件。
+轻量级流程图绘制插件，在 Obsidian 中直接创建和编辑 `.simpledraw` 文件。<br>
 A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files directly in Obsidian.
 
 ![version](https://img.shields.io/badge/version-1.5.1-blue)
@@ -10,15 +10,18 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 ## 使用教程
 ## Usage Guide
 
+操作说明书详见 [`asets/基本操作说明书.md`](asets/基本操作说明书.md)<br>
+Full text manual at [`asets/基本操作说明书.md`](asets/基本操作说明书.md)
+
 ### 画板操作
 ### Canvas
 
 <video src="asets/画板基本操作.mp4" controls width="100%"></video>
 
-**移动**：鼠标中键拖拽
+**移动**：鼠标中键拖拽<br>
 **Pan**: Middle-click drag
 
-**缩放**：Ctrl + 鼠标滚轮
+**缩放**：Ctrl + 鼠标滚轮<br>
 **Zoom**: Ctrl + scroll wheel
 
 ### 文本框
@@ -26,13 +29,13 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 
 <video src="asets/插入文本框元素并编辑.mp4" controls width="100%"></video>
 
-1. 点击左上角 **T** 按钮，在画板点击两次确定位置。
+1. 点击左上角 **T** 按钮，在画板点击两次确定位置。<br>
    Click the **T** button, then click twice on the canvas to place a textbox.
-2. 双击文本框打开编辑器。
+2. 双击文本框打开编辑器。<br>
    Double-click a textbox to open its editor.
-3. 拖拽四角调整大小。
+3. 拖拽四角调整大小。<br>
    Drag the corners to resize.
-4. **锁定**：编辑器菜单点击 🔒。**解锁**：右键文本框 →「解锁」。
+4. **锁定**：编辑器菜单点击 🔒。**解锁**：右键文本框 →「解锁」。<br>
    **Lock**: Click 🔒 in the editor. **Unlock**: Right-click → "Unlock".
 
 ### 箭头
@@ -40,54 +43,54 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 
 <video src="asets/线段基本操作.mp4" controls width="100%"></video>
 
-1. 点击左上角 **→** 按钮，在画板点击起点和终点。
+1. 点击左上角 **→** 按钮，在画板点击起点和终点。<br>
    Click the **→** button, then click start and end points on the canvas.
-2. 端点可自动吸附文本框锚点，也可自由放置。
+2. 端点可自动吸附文本框锚点，也可自由放置。<br>
    Endpoints auto-snap to anchors or remain free.
-3. 吸附箭头自动跟随锚点移动。
+3. 吸附箭头自动跟随锚点移动。<br>
    Snapped arrows automatically follow anchor movement.
-4. **双击箭头**弹出菜单：
+4. **双击箭头**弹出菜单：<br>
    **Double-click an arrow** to open its menu:
-    - 首尾箭头显隐切换
-    - Start & End arrow toggle
-    - 实线/虚线切换
-    - Solid & Dashed toggle
-    - **T** 文字标签开关
-    - Label toggle
-    - 删除
-    - Delete
-5. 方向可通过菜单选择或键盘方向键 **←↑↓→** 切换。
+   - 首尾箭头显隐切换
+   - Start & End arrow toggle
+   - 实线/虚线切换
+   - Solid & Dashed toggle
+   - **T** 文字标签开关
+   - Label toggle
+   - 删除
+   - Delete
+5. 方向可通过菜单选择或键盘方向键 **←↑↓→** 切换。<br>
    Direction can be set via the menu or arrow keys.
 
 ### 文字标签
 ### Arrow Label
 
-双击箭头 → 点击 **T** 按钮 → 箭头中点出现可编辑文字，支持 Markdown，自动跟随箭头移动。
+双击箭头 → 点击 **T** 按钮 → 箭头中点出现可编辑文字，支持 Markdown，自动跟随箭头移动。<br>
 Double-click an arrow → click **T** → an editable label appears at the midpoint. Supports Markdown and auto-follows the arrow.
 
-开关隐藏/显示（保留内容）。空内容时画布显示灰色提示「请输入 markdown 文本」。
+开关隐藏/显示（保留内容）。空内容时画布显示灰色提示「请输入 markdown 文本」。<br>
 Toggle to hide/show (content is preserved). Shows a placeholder when empty.
 
 ### 选择与编辑
 ### Selection & Editing
 
-**选择**：单击 / Ctrl+单击多选 / 拖拽框选。
-**Select**: Click / Ctrl+click / drag box select.
-**复制粘贴**：Ctrl+C / Ctrl+V，支持跨文件。
-**Copy/Paste**: Ctrl+C / Ctrl+V, cross-file support.
-**外部文本**：复制文字后到画板 Ctrl+V 自动创建文本框。
-**External Text**: Paste external text on canvas to create a textbox.
-**删除**：选中后按 Delete。
-**Delete**: Select and press Delete.
-**撤销**：Ctrl+Z。
-**Undo**: Ctrl+Z.
-**重做**：Ctrl+Shift+Z。
+**选择**：单击 / Ctrl+单击多选 / 拖拽框选。<br>
+**Select**: Click / Ctrl+click / drag box select.<br>
+**复制粘贴**：Ctrl+C / Ctrl+V，支持跨文件。<br>
+**Copy/Paste**: Ctrl+C / Ctrl+V, cross-file support.<br>
+**外部文本**：复制文字后到画板 Ctrl+V 自动创建文本框。<br>
+**External Text**: Paste external text on canvas to create a textbox.<br>
+**删除**：选中后按 Delete。<br>
+**Delete**: Select and press Delete.<br>
+**撤销**：Ctrl+Z。<br>
+**Undo**: Ctrl+Z.<br>
+**重做**：Ctrl+Shift+Z。<br>
 **Redo**: Ctrl+Shift+Z.
 
 ### 锚点方案
 ### Anchor Scheme
 
-在设置面板「吸附功能」中切换：
+在设置面板「吸附功能」中切换：<br>
 Switch in Settings → Snap:
 
 - **方案一 Scheme 1（默认）**：8 锚点（4 角点 + 4 边中点）。8 anchors (4 corners + 4 midpoints).
@@ -144,22 +147,22 @@ Switch in Settings → Snap:
 ### 右键菜单
 ### Context Menu
 
-文本框置顶 / 置底。解锁文本框。
+文本框置顶 / 置底。解锁文本框。<br>
 Bring to Front / Send to Back. Unlock textbox.
 
 ### 导出
 ### Export
 
-**PNG 导出** — DOM 截图，所见即所得，保留数学公式和代码块。
+**PNG 导出** — DOM 截图，所见即所得，保留数学公式和代码块。<br>
 DOM screenshot, WYSIWYG, preserves math & code blocks.
 
-选项：网格 / 透明背景。
+选项：网格 / 透明背景。<br>
 Options: Grid / Transparent background.
 
 ### 多语言
 ### i18n
 
-中文 / English — 设置面板一键切换。
+中文 / English — 设置面板一键切换。<br>
 One-click switch in settings.
 
 ---
@@ -167,13 +170,13 @@ One-click switch in settings.
 ## 安装
 ## Installation
 
-1. 下载 `main.js`、`manifest.json`、`styles.css`。
+1. 下载 `main.js`、`manifest.json`、`styles.css`。<br>
    Download `main.js`, `manifest.json`, `styles.css`.
-2. 复制到 `.obsidian/plugins/simple-draw/`。
+2. 复制到 `.obsidian/plugins/simple-draw/`。<br>
    Copy to `.obsidian/plugins/simple-draw/`.
-3. 在 Obsidian 设置中启用插件。
+3. 在 Obsidian 设置中启用插件。<br>
    Enable the plugin in Obsidian settings.
-4. 在文件夹上右键 →「插入 SimpleDraw」新建 `.simpledraw` 文件。
+4. 在文件夹上右键 →「插入 SimpleDraw」新建 `.simpledraw` 文件。<br>
    Right-click a folder → "Insert SimpleDraw" to create a `.simpledraw` file.
 
 ---
