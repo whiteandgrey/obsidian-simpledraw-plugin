@@ -1,3 +1,4 @@
+
 # SimpleDraw
 
 轻量级流程图绘制插件，在 Obsidian 中直接创建和编辑 `.simpledraw` 文件。<br>
@@ -13,7 +14,7 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 ### 画板操作
 ### Canvas
 
-<video src="asets/画板基本操作.mp4" controls width="100%"></video>
+
 
 **移动**：鼠标中键拖拽<br>
 **Pan**: Middle-click drag
