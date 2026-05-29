@@ -11,6 +11,11 @@ A lightweight flowchart drawing plugin. Create and edit `.simpledraw` files dire
 > 🔗 https://github.com/whiteandgrey/SimpleDraw
 
 ---
+## 绘制样例
+## Drawing Example
+
+ ![img](assets/推理过程.png)
+![img](assets/英文版训练及预训练过程.png)
 
 ## 使用教程
 ## Usage Guide
