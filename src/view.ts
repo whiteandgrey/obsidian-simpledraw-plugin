@@ -2047,6 +2047,22 @@ export class SimpleDrawView extends TextFileView {
                 content.style.lineHeight = '1.3';
 
                 labelEl.appendChild(content);
+
+                // z-order: insert after the highest-z connected textbox (one-time only on creation)
+                const connectIds: string[] = [];
+                if ('elementId' in arrow.startConnection) connectIds.push(arrow.startConnection.elementId);
+                if ('elementId' in arrow.endConnection) connectIds.push(arrow.endConnection.elementId);
+                if (connectIds.length > 0) {
+                    let maxIdx = -1;
+                    let ref: Element | null = null;
+                    for (const cid of connectIds) {
+                        const idx = this.engine.data.elements.findIndex(e => e.id === cid);
+                        if (idx > maxIdx) { maxIdx = idx; ref = this.elementsLayer.querySelector(`[data-id="${cid}"]`); }
+                    }
+                    if (ref && ref.parentNode) {
+                        ref.parentNode.insertBefore(labelEl, ref.nextSibling);
+                    }
+                }
             }
 
             labelEl.style.left = (mid.x + offset.x) + 'px';
