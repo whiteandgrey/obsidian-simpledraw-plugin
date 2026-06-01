@@ -678,33 +678,11 @@ export class SimpleDrawView extends TextFileView {
     }
 
     handleDefaultMouseDown(e: MouseEvent, pos: { x: number; y: number }, additive: boolean): void {
-        // Close any open editors first (saves content automatically)
-        this.closeEditors();
+        // Check label interactions FIRST (before closeEditors).
+        // This ensures double-click on label can reach startArrowLabelEditor
+        // without labelVisible being unexpectedly cleared by closeEditors.
 
-        // Check all textboxes for resize handle hits (handles extend outside textbox bounds)
-        for (const el of this.engine.data.elements) {
-            if (el.type !== 'textbox') continue;
-            const tb = el as TextBoxData;
-            const handle = this.engine.getResizeHandle(tb, pos.x, pos.y);
-            if (handle) {
-                this.engine.selectElement(tb.id, additive);
-                this.engine.dragging = {
-                    type: 'resize',
-                    startMouseX: pos.x,
-                    startMouseY: pos.y,
-                    startX: tb.x,
-                    startY: tb.y,
-                    startWidth: tb.width,
-                    startHeight: tb.height,
-                    resizeHandle: handle,
-                    textboxId: tb.id,
-                };
-                this.containerEl.style.cursor = 'nwse-resize';
-                return;
-            }
-        }
-
-        // Check arrow label resize handles
+        // 1. Arrow label resize handles
         const labelHandle = (e.target as HTMLElement).closest('[data-label-handle-id]') as HTMLElement | null;
         if (labelHandle) {
             const arrowId = labelHandle.dataset.labelHandleId!;
@@ -713,7 +691,6 @@ export class SimpleDrawView extends TextFileView {
                 e => e.id === arrowId && e.type === 'arrow'
             ) as ArrowData | undefined;
             if (arrow && this.engine.selectedIds.has(arrowId)) {
-                // 读取标签 DOM 实际渲染尺寸用于增量缩放
                 const labelDom = this.elementsLayer.querySelector(
                     `[data-arrow-label-id="${arrowId}"]`) as HTMLElement | null;
                 const zoom = this.engine.data.viewState.zoom;
@@ -735,15 +712,40 @@ export class SimpleDrawView extends TextFileView {
             }
         }
 
-        // 点击标签文本区域 → 直接选中箭头（不启动 MOVE），使手柄立即出现
-        if (!labelHandle) {
-            const labelHit = (e.target as HTMLElement).closest('[data-arrow-label-id]') as HTMLElement | null;
-            if (labelHit) {
-                const arrowId = labelHit.dataset.arrowLabelId!;
-                if (!this.engine.selectedIds.has(arrowId)) {
-                    this.engine.selectElement(arrowId, additive);
-                }
+        // 2. Label click → 逻辑双击：未选中则选中，已选中则编辑
+        const labelArrow = this.engine.getLabelAt(pos.x, pos.y);
+        if (labelArrow) {
+            if (this.engine.selectedIds.has(labelArrow.id)) {
+                this.startArrowLabelEditor(labelArrow.id);
+            } else {
+                this.engine.selectElement(labelArrow.id, additive);
                 this.requestRender();
+            }
+            return;
+        }
+
+        // 3. Close any open editors (label interactions already handled above)
+        this.closeEditors();
+
+        // 4. Check all textboxes for resize handle hits
+        for (const el of this.engine.data.elements) {
+            if (el.type !== 'textbox') continue;
+            const tb = el as TextBoxData;
+            const handle = this.engine.getResizeHandle(tb, pos.x, pos.y);
+            if (handle) {
+                this.engine.selectElement(tb.id, additive);
+                this.engine.dragging = {
+                    type: 'resize',
+                    startMouseX: pos.x,
+                    startMouseY: pos.y,
+                    startX: tb.x,
+                    startY: tb.y,
+                    startWidth: tb.width,
+                    startHeight: tb.height,
+                    resizeHandle: handle,
+                    textboxId: tb.id,
+                };
+                this.containerEl.style.cursor = 'nwse-resize';
                 return;
             }
         }
@@ -966,18 +968,15 @@ export class SimpleDrawView extends TextFileView {
     }
 
     onDblClick(e: MouseEvent): void {
-        // Check if double-clicked on arrow label
-        const target = e.target as HTMLElement;
-        const labelEl = target.closest('[data-arrow-label-id]') as HTMLElement | null;
-        if (labelEl) {
-            const arrowId = labelEl.dataset.arrowLabelId;
-            if (arrowId) {
-                this.startArrowLabelEditor(arrowId);
-                return;
-            }
+        const canvasPos = this.engine.screenToCanvas(e.clientX, e.clientY);
+
+        // getLabelAt 兜底（仅用于浏览器仍能触达 dblclick 的场景）
+        const labelArrow = this.engine.getLabelAt(canvasPos.x, canvasPos.y);
+        if (labelArrow) {
+            this.startArrowLabelEditor(labelArrow.id);
+            return;
         }
 
-        const canvasPos = this.engine.screenToCanvas(e.clientX, e.clientY);
         const el = this.engine.getElementAt(canvasPos.x, canvasPos.y);
         if (el && el.type === 'textbox') {
             if ((el as TextBoxData).locked) return;
@@ -1575,11 +1574,6 @@ export class SimpleDrawView extends TextFileView {
                         this.engine.saveHistory();
                         this.engine.notifyChange();
                     }
-                    if (!textarea.value.trim()) {
-                        arrow.labelVisible = false;
-                        this.engine.saveHistory();
-                        this.engine.notifyChange();
-                    }
                 }
             }
         }
@@ -1703,6 +1697,17 @@ export class SimpleDrawView extends TextFileView {
         confirmBtn.style.background = 'var(--interactive-accent)';
         confirmBtn.style.color = 'var(--text-on-accent)';
         confirmBtn.addEventListener('click', () => {
+            const ta = this.labelEditorEl?.querySelector('textarea') as HTMLTextAreaElement | null;
+            if (ta && this.labelEditorArrowId) {
+                const a = this.engine.data.elements.find(
+                    e => e.id === this.labelEditorArrowId && e.type === 'arrow'
+                ) as ArrowData | undefined;
+                if (a && !ta.value.trim()) {
+                    a.labelVisible = false;
+                    this.engine.saveHistory();
+                    this.engine.notifyChange();
+                }
+            }
             this.closeEditors();
             this.requestRender();
         });
@@ -2085,25 +2090,6 @@ export class SimpleDrawView extends TextFileView {
                     }
                 }
                 contentEl.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
-            }
-
-            // Reposition label in DOM to match its arrow's z-order
-            const connectedTextboxIds: string[] = [];
-            if ('elementId' in arrow.startConnection) connectedTextboxIds.push(arrow.startConnection.elementId);
-            if ('elementId' in arrow.endConnection) connectedTextboxIds.push(arrow.endConnection.elementId);
-            if (connectedTextboxIds.length > 0) {
-                let maxIdx = -1;
-                let insertAfter: Element | null = null;
-                for (const id of connectedTextboxIds) {
-                    const idx = this.engine.data.elements.findIndex(e => e.id === id);
-                    if (idx > maxIdx) {
-                        maxIdx = idx;
-                        insertAfter = this.elementsLayer.querySelector(`[data-id="${id}"]`);
-                    }
-                }
-                if (insertAfter && insertAfter.parentNode) {
-                    insertAfter.parentNode.insertBefore(labelEl, insertAfter.nextSibling);
-                }
             }
 
             // Resize handles (only when arrow is selected and not actively in label editor)

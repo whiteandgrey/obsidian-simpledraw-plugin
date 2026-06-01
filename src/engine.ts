@@ -1318,6 +1318,34 @@ export class SimpleDrawEngine {
         return null;
     }
 
+    getLabelAt(canvasX: number, canvasY: number): ArrowData | null {
+        for (let i = this.data.elements.length - 1; i >= 0; i--) {
+            const el = this.data.elements[i]!;
+            if (el.type !== 'arrow') continue;
+            const arrow = el as ArrowData;
+            if (!arrow.labelVisible) continue;
+            if (this.isPointInLabel(arrow, canvasX, canvasY)) {
+                return arrow;
+            }
+        }
+        return null;
+    }
+
+    isPointInLabel(arrow: ArrowData, x: number, y: number): boolean {
+        const mid = this.getArrowMidpoint(arrow);
+        const offset = this.getLabelOffset(arrow, arrow.labelPosition ?? 'overlap');
+        const cx = mid.x + offset.x;
+        const cy = mid.y + offset.y;
+        if (arrow.labelWidth && arrow.labelHeight) {
+            return x >= cx - arrow.labelWidth / 2 && x <= cx + arrow.labelWidth / 2 &&
+                   y >= cy - arrow.labelHeight / 2 && y <= cy + arrow.labelHeight / 2;
+        }
+        const estW = 140;
+        const estH = 36;
+        return x >= cx - estW / 2 && x <= cx + estW / 2 &&
+               y >= cy - estH / 2 && y <= cy + estH / 2;
+    }
+
     isPointInElement(el: ElementData, x: number, y: number): boolean {
         if (el.type === 'textbox') {
             const tb = el as TextBoxData;
