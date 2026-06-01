@@ -1574,6 +1574,11 @@ export class SimpleDrawView extends TextFileView {
                         this.engine.saveHistory();
                         this.engine.notifyChange();
                     }
+                    if (!textarea.value.trim()) {
+                        arrow.labelVisible = false;
+                        this.engine.saveHistory();
+                        this.engine.notifyChange();
+                    }
                 }
             }
         }
@@ -1697,17 +1702,6 @@ export class SimpleDrawView extends TextFileView {
         confirmBtn.style.background = 'var(--interactive-accent)';
         confirmBtn.style.color = 'var(--text-on-accent)';
         confirmBtn.addEventListener('click', () => {
-            const ta = this.labelEditorEl?.querySelector('textarea') as HTMLTextAreaElement | null;
-            if (ta && this.labelEditorArrowId) {
-                const a = this.engine.data.elements.find(
-                    e => e.id === this.labelEditorArrowId && e.type === 'arrow'
-                ) as ArrowData | undefined;
-                if (a && !ta.value.trim()) {
-                    a.labelVisible = false;
-                    this.engine.saveHistory();
-                    this.engine.notifyChange();
-                }
-            }
             this.closeEditors();
             this.requestRender();
         });
@@ -2082,6 +2076,8 @@ export class SimpleDrawView extends TextFileView {
                     contentEl.empty();
                     contentEl.setAttribute('data-rendered', content);
                     if (content.trim()) {
+                        contentEl.style.opacity = '';
+                        contentEl.style.color = '';
                         MarkdownRenderer.render(this.app, content, contentEl, this.file?.path ?? '', this);
                     } else {
                         contentEl.textContent = t('arrowLabelEditor.placeholder');
