@@ -145,6 +145,8 @@ const zh: Record<string, string> = {
     'settings.showAnchorDots.desc': '在箭头与文本框连接处显示小圆点标记',
     'settings.textboxDefaultFontSize.name': '默认字号',
     'settings.textboxDefaultFontSize.desc': '新建文本框的默认字体大小（8-72px）',
+    'settings.labelDefaultFontSize.name': '线段标签默认字号',
+    'settings.labelDefaultFontSize.desc': '新建线段标签的默认字体大小（8-72px）',
 
     'settings.anchorScheme.name': '锚点方案',
     'settings.anchorScheme.desc': '选择文本框的锚点布局方案',
@@ -282,6 +284,8 @@ const en: Record<string, string> = {
     'settings.showAnchorDots.desc': 'Show small dots at arrow connection points',
     'settings.textboxDefaultFontSize.name': 'Default Font Size',
     'settings.textboxDefaultFontSize.desc': 'Default font size for new textboxes (8-72px)',
+    'settings.labelDefaultFontSize.name': 'Label Default Font Size',
+    'settings.labelDefaultFontSize.desc': 'Default font size for new arrow labels (8-72px)',
 
     'settings.anchorScheme.name': 'Anchor Scheme',
     'settings.anchorScheme.desc': 'Select the anchor point layout scheme for textboxes',

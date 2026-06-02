@@ -1630,19 +1630,19 @@ export class SimpleDrawView extends TextFileView {
         toolbar.style.alignItems = 'center';
 
         const sizeDisplay = toolbar.createSpan();
-        sizeDisplay.textContent = (arrow.labelFontSize ?? 16) + 'px';
+        sizeDisplay.textContent = (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) + 'px';
         sizeDisplay.style.fontSize = '12px';
         sizeDisplay.style.color = 'var(--text-muted)';
         sizeDisplay.style.minWidth = '30px';
         sizeDisplay.style.textAlign = 'right';
 
         const updateSizeDisplay = () => {
-            sizeDisplay.textContent = (arrow.labelFontSize ?? 16) + 'px';
+            sizeDisplay.textContent = (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) + 'px';
         };
 
         const shrinkBtn = this.createSmallButton('A-', t('textboxEditor.fontSize.shrink'));
         shrinkBtn.addEventListener('click', () => {
-            arrow.labelFontSize = Math.max(8, (arrow.labelFontSize ?? 16) - 2);
+            arrow.labelFontSize = Math.max(8, (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) - 2);
             updateSizeDisplay();
             this.engine.saveHistory();
             this.engine.notifyChange();
@@ -1652,7 +1652,7 @@ export class SimpleDrawView extends TextFileView {
 
         const growBtn = this.createSmallButton('A+', t('textboxEditor.fontSize.grow'));
         growBtn.addEventListener('click', () => {
-            arrow.labelFontSize = Math.min(72, (arrow.labelFontSize ?? 16) + 2);
+            arrow.labelFontSize = Math.min(72, (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) + 2);
             updateSizeDisplay();
             this.engine.saveHistory();
             this.engine.notifyChange();
@@ -1662,7 +1662,7 @@ export class SimpleDrawView extends TextFileView {
 
         const resetBtn = this.createSmallButton('R', t('textboxEditor.fontSize.reset'));
         resetBtn.addEventListener('click', () => {
-            arrow.labelFontSize = 16;
+            arrow.labelFontSize = this.settings.labelDefaultFontSize;
             updateSizeDisplay();
             this.engine.saveHistory();
             this.engine.notifyChange();
@@ -2043,7 +2043,7 @@ export class SimpleDrawView extends TextFileView {
                 labelEl.style.boxSizing = 'border-box';
 
                 const content = labelEl.createDiv('simpledraw-arrow-label-content');
-                content.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+                content.style.fontSize = (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) + 'px';
                 content.style.lineHeight = '1.3';
 
                 labelEl.appendChild(content);
@@ -2101,7 +2101,7 @@ export class SimpleDrawView extends TextFileView {
                         contentEl.style.color = 'var(--text-muted)';
                     }
                 }
-                contentEl.style.fontSize = (arrow.labelFontSize ?? 16) + 'px';
+                contentEl.style.fontSize = (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) + 'px';
             }
 
             // Resize handles (only when arrow is selected and not actively in label editor)
