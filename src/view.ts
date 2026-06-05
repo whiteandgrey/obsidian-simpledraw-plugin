@@ -243,10 +243,7 @@ export class SimpleDrawView extends TextFileView {
 
         // Grid background
         this.gridEl = this.viewportEl.createDiv('simpledraw-grid');
-        this.gridEl.style.top = '-5000px';
-        this.gridEl.style.left = '-5000px';
-        this.gridEl.style.width = '10000px';
-        this.gridEl.style.height = '10000px';
+        this.gridEl.setCssProps({ top: '-5000px', left: '-5000px', width: '10000px', height: '10000px' });
 
         // SVG layer for arrows
         this.svgLayer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -411,16 +408,12 @@ export class SimpleDrawView extends TextFileView {
 
         for (const d of dirs) {
             const btn = document.createElement('button');
+            btn.className = 'simpledraw-dir-btn';
             btn.textContent = d.label;
             btn.title = d.dir;
-            btn.style.width = '28px';
-            btn.style.height = '28px';
-            btn.style.border = '1px solid transparent';
-            btn.style.borderRadius = '4px';
-            btn.style.background = this.engine.arrowDirection === d.dir ? 'var(--interactive-accent-hover)' : 'transparent';
-            btn.style.cursor = 'pointer';
-            btn.style.fontSize = '14px';
-            btn.style.color = 'var(--text-normal)';
+            btn.setCssProps({
+                background: this.engine.arrowDirection === d.dir ? 'var(--interactive-accent-hover)' : 'transparent',
+            });
             btn.addEventListener('mousedown', (e) => {
                 e.stopPropagation();
                 e.preventDefault();
@@ -458,7 +451,9 @@ export class SimpleDrawView extends TextFileView {
 
     updateDirectionButtons(): void {
         for (const [dir, btn] of this.directionBtns) {
-            btn.style.background = this.engine.arrowDirection === dir ? 'var(--interactive-accent-hover)' : 'transparent';
+            btn.setCssProps({
+                background: this.engine.arrowDirection === dir ? 'var(--interactive-accent-hover)' : 'transparent',
+            });
         }
     }
 
@@ -474,18 +469,23 @@ export class SimpleDrawView extends TextFileView {
         const isTextboxMode = this.engine.mode === InteractionMode.InsertTextBox;
         const isArrowMode = this.engine.mode === InteractionMode.InsertArrow;
 
-        this.btnInsertTextbox.style.borderColor = isTextboxMode ? 'var(--interactive-accent)' : 'transparent';
-        this.btnInsertTextbox.style.background = isTextboxMode ? 'var(--interactive-accent-hover)' : 'transparent';
-
-        this.btnInsertArrow.style.borderColor = isArrowMode ? 'var(--interactive-accent)' : 'transparent';
-        this.btnInsertArrow.style.background = isArrowMode ? 'var(--interactive-accent-hover)' : 'transparent';
+        this.btnInsertTextbox.setCssProps({
+            borderColor: isTextboxMode ? 'var(--interactive-accent)' : 'transparent',
+            background: isTextboxMode ? 'var(--interactive-accent-hover)' : 'transparent',
+        });
+        this.btnInsertArrow.setCssProps({
+            borderColor: isArrowMode ? 'var(--interactive-accent)' : 'transparent',
+            background: isArrowMode ? 'var(--interactive-accent-hover)' : 'transparent',
+        });
     }
 
     updateSnapButton(): void {
         const on = this.settings.snapEnabled;
-        this.btnSnapToggle.style.borderColor = on ? 'var(--interactive-accent)' : 'transparent';
-        this.btnSnapToggle.style.background = on ? 'var(--interactive-accent-hover)' : 'transparent';
-        this.btnSnapToggle.style.opacity = on ? '1' : '0.5';
+        this.btnSnapToggle.setCssProps({
+            borderColor: on ? 'var(--interactive-accent)' : 'transparent',
+            background: on ? 'var(--interactive-accent-hover)' : 'transparent',
+            opacity: on ? '1' : '0.5',
+        });
     }
 
     // --- Mouse Handlers ---
@@ -517,7 +517,7 @@ export class SimpleDrawView extends TextFileView {
                 startX: this.engine.data.viewState.panX,
                 startY: this.engine.data.viewState.panY,
             };
-            this.containerEl.style.cursor = 'grabbing';
+            this.containerEl.setCssProps({ cursor: 'grabbing' });
             return;
         }
 
@@ -648,7 +648,7 @@ export class SimpleDrawView extends TextFileView {
                     startHeight: curH,
                     resizeHandle: handle,
                 };
-                this.containerEl.style.cursor = 'nwse-resize';
+                this.containerEl.setCssProps({ cursor: 'nwse-resize' });
                 return;
             }
         }
@@ -686,7 +686,7 @@ export class SimpleDrawView extends TextFileView {
                     resizeHandle: handle,
                     textboxId: tb.id,
                 };
-                this.containerEl.style.cursor = 'nwse-resize';
+                this.containerEl.setCssProps({ cursor: 'nwse-resize' });
                 return;
             }
         }
@@ -715,7 +715,7 @@ export class SimpleDrawView extends TextFileView {
                 startX: pos.x,
                 startY: pos.y,
             };
-            this.containerEl.style.cursor = 'move';
+            this.containerEl.setCssProps({ cursor: 'move' });
             return;
         }
 
@@ -741,7 +741,7 @@ export class SimpleDrawView extends TextFileView {
             startY: pos.y,
         };
 
-        this.containerEl.style.cursor = 'crosshair';
+        this.containerEl.setCssProps({ cursor: 'crosshair' });
     }
 
     onMouseMove(e: MouseEvent): void {
@@ -875,7 +875,7 @@ export class SimpleDrawView extends TextFileView {
                 additive
             );
             this.engine.selectionState = null;
-            this.containerEl.style.cursor = 'default';
+            this.containerEl.setCssProps({ cursor: 'default' });
         }
 
         // Apply alignment snap before saving history
@@ -896,7 +896,7 @@ export class SimpleDrawView extends TextFileView {
         this.engine.clearAlignmentSnap();
         this.engine.clearResizeSnap();
         this.engine.dragging = null;
-        this.containerEl.style.cursor = 'default';
+        this.containerEl.setCssProps({ cursor: 'default' });
         this.requestRender();
     }
 
@@ -1109,11 +1109,11 @@ export class SimpleDrawView extends TextFileView {
         const updateAlignHighlights = () => {
             for (let i = 0; i < vAligns.length; i++) {
                 const btn = vAlignBtns[i];
-                if (btn) btn.style.background = el.vAlign === vAligns[i]!.value ? 'var(--interactive-accent-hover)' : 'transparent';
+                if (btn) btn.setCssProps({ background: el.vAlign === vAligns[i]!.value ? 'var(--interactive-accent-hover)' : 'transparent' });
             }
             for (let i = 0; i < hAligns.length; i++) {
                 const btn = hAlignBtns[i];
-                if (btn) btn.style.background = el.hAlign === hAligns[i]!.value ? 'var(--interactive-accent-hover)' : 'transparent';
+                if (btn) btn.setCssProps({ background: el.hAlign === hAligns[i]!.value ? 'var(--interactive-accent-hover)' : 'transparent' });
             }
         };
 
@@ -1148,8 +1148,10 @@ export class SimpleDrawView extends TextFileView {
         // Writing mode toggle
         const wmBtn = this.createSmallButton(t('textboxEditor.writingModeLabel'), t('textboxEditor.writingMode'));
         const updateWmBtn = () => {
-            wmBtn.style.background = (el.writingMode ?? 'horizontal-tb') === 'vertical-rl'
-                ? 'var(--interactive-accent-hover)' : 'transparent';
+            wmBtn.setCssProps({
+                background: (el.writingMode ?? 'horizontal-tb') === 'vertical-rl'
+                    ? 'var(--interactive-accent-hover)' : 'transparent',
+            });
         };
         updateWmBtn();
         wmBtn.addEventListener('click', () => {
@@ -1172,8 +1174,10 @@ export class SimpleDrawView extends TextFileView {
         const updateShapeHighlights = () => {
             const cur = el.shape ?? 'rectangle';
             for (let i = 0; i < shapes.length; i++) {
-                shapeBtns[i]!.style.background = shapes[i]!.value === cur
-                    ? 'var(--interactive-accent-hover)' : 'transparent';
+                shapeBtns[i]!.setCssProps({
+                    background: shapes[i]!.value === cur
+                        ? 'var(--interactive-accent-hover)' : 'transparent',
+                });
             }
         };
         for (const s of shapes) {
@@ -1584,10 +1588,12 @@ export class SimpleDrawView extends TextFileView {
         const currentPos = arrow.labelPosition ?? 'overlap';
         for (const p of positions) {
             const posBtn = this.createSmallButton(p.icon, t('arrowLabelEditor.position.' + p.key));
-            posBtn.style.marginLeft = p.key === 'overlap' ? '8px' : '0';
+            posBtn.setCssProps({ marginLeft: p.key === 'overlap' ? '8px' : '0' });
             if (p.key === currentPos) {
-                posBtn.style.background = 'var(--interactive-accent)';
-                posBtn.style.color = 'var(--text-on-accent)';
+                posBtn.setCssProps({
+                    background: 'var(--interactive-accent)',
+                    color: 'var(--text-on-accent)',
+                });
             }
             posBtn.addEventListener('click', () => {
                 arrow.labelPosition = p.key;
@@ -1601,9 +1607,11 @@ export class SimpleDrawView extends TextFileView {
 
         // Confirm button
         const confirmBtn = this.createSmallButton('✓', t('arrowLabelEditor.confirm'));
-        confirmBtn.style.marginLeft = 'auto';
-        confirmBtn.style.background = 'var(--interactive-accent)';
-        confirmBtn.style.color = 'var(--text-on-accent)';
+        confirmBtn.setCssProps({
+            marginLeft: 'auto',
+            background: 'var(--interactive-accent)',
+            color: 'var(--text-on-accent)',
+        });
         confirmBtn.addEventListener('click', () => {
             this.closeEditors();
             this.requestRender();
@@ -2554,13 +2562,15 @@ export class SimpleDrawView extends TextFileView {
             const y = Math.min(ss.startY, ss.currentY);
             const w = Math.abs(ss.currentX - ss.startX);
             const h = Math.abs(ss.currentY - ss.startY);
-            this.selectionBox.style.display = 'block';
-            this.selectionBox.style.left = x + 'px';
-            this.selectionBox.style.top = y + 'px';
-            this.selectionBox.style.width = w + 'px';
-            this.selectionBox.style.height = h + 'px';
+            this.selectionBox.setCssProps({
+                display: 'block',
+                left: x + 'px',
+                top: y + 'px',
+                width: w + 'px',
+                height: h + 'px',
+            });
         } else {
-            this.selectionBox.style.display = 'none';
+        this.selectionBox.setCssProps({ display: 'none' });
         }
     }
 
