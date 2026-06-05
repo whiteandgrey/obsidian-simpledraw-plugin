@@ -230,7 +230,7 @@ export class SimpleDrawView extends TextFileView {
             overflow: 'hidden',
             width: '100%',
             height: '100%',
-            userSelect: 'none',
+            'user-select': 'none',
         });
 
         // Container
@@ -245,6 +245,8 @@ export class SimpleDrawView extends TextFileView {
         this.gridEl = this.viewportEl.createDiv('simpledraw-grid');
         this.gridEl.style.top = '-5000px';
         this.gridEl.style.left = '-5000px';
+        this.gridEl.style.width = '10000px';
+        this.gridEl.style.height = '10000px';
 
         // SVG layer for arrows
         this.svgLayer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -378,26 +380,27 @@ export class SimpleDrawView extends TextFileView {
     showDirectionMenu(): void {
         if (this.directionMenuEl) return;
 
-        this.directionMenuEl = this.containerEl.createDiv('simpledraw-direction-menu');
-        this.directionMenuEl.style.position = 'absolute';
-        this.directionMenuEl.style.top = '48px';
-        this.directionMenuEl.style.left = '8px';
-        this.directionMenuEl.style.zIndex = '100';
-        this.directionMenuEl.style.display = 'flex';
-        this.directionMenuEl.style.flexDirection = 'column';
-        this.directionMenuEl.style.gap = '2px';
-        this.directionMenuEl.style.background = 'var(--background-primary)';
-        this.directionMenuEl.style.border = '1px solid var(--background-modifier-border)';
-        this.directionMenuEl.style.borderRadius = '6px';
-        this.directionMenuEl.style.padding = '4px';
-        this.directionMenuEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        this.directionMenuEl = this.containerEl.createDiv('simpledraw-dir-menu');
+        this.directionMenuEl.setCssProps({
+            position: 'absolute',
+            top: '48px',
+            left: '8px',
+            'z-index': '100',
+            display: 'flex',
+            'flex-direction': 'column',
+            gap: '2px',
+            padding: '4px',
+            'box-shadow': '0 2px 8px rgba(0,0,0,0.15)',
+        });
 
         const label = this.directionMenuEl.createDiv();
         label.textContent = t('directionMenu.label');
-        label.style.fontSize = '10px';
-        label.style.color = 'var(--text-muted)';
-        label.style.textAlign = 'center';
-        label.style.marginBottom = '2px';
+        label.setCssProps({
+            'font-size': '10px',
+            color: 'var(--text-muted)',
+            'text-align': 'center',
+            'margin-bottom': '2px',
+        });
 
         const dirs: { dir: ArrowDirection; label: string }[] = [
             { dir: 'up', label: '↑' },
@@ -496,9 +499,7 @@ export class SimpleDrawView extends TextFileView {
             !target.closest('.simpledraw-label-resize-handle') &&
             !target.closest('[data-arrow-label-id]') &&
             (target.closest('.simpledraw-menu') ||
-             target.closest('.simpledraw-textbox-editor') ||
-             target.closest('.simpledraw-arrow-editor') ||
-             target.closest('.simpledraw-arrow-label-editor'))) {
+             target.closest('.simpledraw-editor-overlay'))) {
             return;
         }
 
@@ -1045,26 +1046,13 @@ export class SimpleDrawView extends TextFileView {
         this.engine.editingTextboxId = id;
 
         // Create editor overlay
-        this.textboxEditorEl = this.containerEl.createDiv('simpledraw-textbox-editor');
-        this.textboxEditorEl.style.position = 'absolute';
-        this.textboxEditorEl.style.zIndex = '200';
-        this.textboxEditorEl.style.background = 'var(--background-primary)';
-        this.textboxEditorEl.style.border = '2px solid var(--interactive-accent)';
-        this.textboxEditorEl.style.borderRadius = '4px';
-        this.textboxEditorEl.style.padding = '8px';
-        this.textboxEditorEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
-        this.textboxEditorEl.style.minWidth = '250px';
-        this.textboxEditorEl.style.maxWidth = '500px';
+        this.textboxEditorEl = this.containerEl.createDiv('simpledraw-editor-overlay is-textbox');
 
         this.positionTextboxEditor(el);
 
         // Toolbar
         const toolbar = this.textboxEditorEl.createDiv('simpledraw-editor-toolbar');
-        toolbar.style.display = 'flex';
-        toolbar.style.gap = '4px';
-        toolbar.style.marginBottom = '8px';
-        toolbar.style.flexWrap = 'wrap';
-        toolbar.style.alignItems = 'center';
+        toolbar.setCssProps({ 'flex-wrap': 'wrap' });
 
         // Visibility toggle
         const visBtn = this.createSmallButton(el.visible ? '👁' : '👁‍🗨', t('textboxEditor.toggleVisibility'));
@@ -1096,11 +1084,13 @@ export class SimpleDrawView extends TextFileView {
 
         // Alignment buttons
         const alignGroup = document.createElement('div');
-        alignGroup.style.display = 'flex';
-        alignGroup.style.gap = '2px';
-        alignGroup.style.marginLeft = '8px';
-        alignGroup.style.borderLeft = '1px solid var(--background-modifier-border)';
-        alignGroup.style.paddingLeft = '8px';
+        alignGroup.setCssProps({
+            display: 'flex',
+            gap: '2px',
+            'margin-left': '8px',
+            'border-left': '1px solid var(--background-modifier-border)',
+            'padding-left': '8px',
+        });
 
         const vAligns: { label: string; value: 'top' | 'middle' | 'bottom'; title: string }[] = [
             { label: '⊤', value: 'top', title: t('textboxEditor.align.top') },
@@ -1222,9 +1212,11 @@ export class SimpleDrawView extends TextFileView {
 
         // Confirm button
         const confirmBtn = this.createSmallButton('✓', t('textboxEditor.confirm'));
-        confirmBtn.style.marginLeft = 'auto';
-        confirmBtn.style.background = 'var(--interactive-accent)';
-        confirmBtn.style.color = 'var(--text-on-accent)';
+        confirmBtn.setCssProps({
+            'margin-left': 'auto',
+            background: 'var(--interactive-accent)',
+            color: 'var(--text-on-accent)',
+        });
         confirmBtn.addEventListener('click', () => {
             this.closeEditors();
             this.requestRender();
@@ -1233,8 +1225,6 @@ export class SimpleDrawView extends TextFileView {
 
         // Row 2: font size controls (styled like toolbar)
         const toolbar2 = this.textboxEditorEl.createDiv('simpledraw-editor-toolbar');
-        toolbar2.style.display = 'flex';
-        toolbar2.style.gap = '4px';
         toolbar2.style.marginBottom = '8px';
         toolbar2.style.alignItems = 'center';
 
@@ -1283,23 +1273,20 @@ export class SimpleDrawView extends TextFileView {
         toolbar2.appendChild(resetBtn);
 
         // Textarea for editing
-        const textarea = this.textboxEditorEl.createEl('textarea');
-        textarea.style.width = '100%';
-        textarea.style.minHeight = '100px';
-        textarea.style.resize = 'both';
-        textarea.style.border = '1px solid var(--background-modifier-border)';
-        textarea.style.borderRadius = '4px';
-        textarea.style.padding = '6px';
-        textarea.style.background = 'var(--background-primary)';
-        textarea.style.color = 'var(--text-normal)';
-        textarea.style.fontFamily = 'var(--font-text)';
-        textarea.style.fontSize = (this.settings.textboxDefaultFontSize ?? 16) + 'px';
+        const textarea = this.textboxEditorEl.createEl('textarea', { cls: 'simpledraw-editor-textarea' });
+        textarea.setCssProps({
+            'min-height': '100px',
+            'font-size': (this.settings.textboxDefaultFontSize ?? 16) + 'px',
+        });
         textarea.value = el.content;
         // Immediately grow to fit existing content
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
+        textarea.setCssProps({
+            height: Math.max(60, textarea.scrollHeight) + 'px',
+        });
+        // Reposition editor with actual content height
+        this.positionTextboxEditor(el);
 
-        textarea.focus();
+        textarea.focus({ preventScroll: true });
 
         textarea.addEventListener('keydown', (ev) => {
             if (ev.key === 'Escape') {
@@ -1317,8 +1304,10 @@ export class SimpleDrawView extends TextFileView {
         textarea.addEventListener('input', () => {
             el.content = textarea.value;
             // Auto-grow textarea to fit content
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
+            textarea.setCssProps({ height: 'auto' });
+            // Force layout then set scrollHeight
+            void textarea.clientHeight;
+            textarea.setCssProps({ height: Math.max(60, textarea.scrollHeight) + 'px' });
             this.requestRender();
         });
 
@@ -1354,15 +1343,14 @@ export class SimpleDrawView extends TextFileView {
         const viewRect = this.containerEl.getBoundingClientRect();
 
         let left = Math.max(0, screen.x);
-        const editorHeight = 200;
+        const editorHeight = this.textboxEditorEl?.offsetHeight || 200;
         let top = screen.y + el.height * this.engine.data.viewState.zoom + 5;
         if (top + editorHeight > viewRect.height) {
             top = screen.y - editorHeight;
         }
         top = Math.max(0, top);
 
-        this.textboxEditorEl.style.left = left + 'px';
-        this.textboxEditorEl.style.top = top + 'px';
+        this.textboxEditorEl.setCssProps({ left: left + 'px', top: top + 'px' });
     }
 
     createSmallButton(label: string, title: string): HTMLElement {
@@ -1385,18 +1373,15 @@ export class SimpleDrawView extends TextFileView {
         const start = this.engine.resolveConnection(el.startConnection);
         const screen = this.engine.canvasToScreen(start.x, start.y);
 
-        this.arrowEditorEl = this.containerEl.createDiv('simpledraw-arrow-editor');
-        this.arrowEditorEl.style.position = 'absolute';
-        this.arrowEditorEl.style.zIndex = '200';
-        this.arrowEditorEl.style.background = 'var(--background-primary)';
-        this.arrowEditorEl.style.border = '2px solid var(--interactive-accent)';
-        this.arrowEditorEl.style.borderRadius = '4px';
+        this.arrowEditorEl = this.containerEl.createDiv('simpledraw-editor-overlay is-arrow');
         this.arrowEditorEl.style.padding = '4px';
-        this.arrowEditorEl.style.display = 'flex';
-        this.arrowEditorEl.style.gap = '4px';
-        this.arrowEditorEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
-        this.arrowEditorEl.style.left = Math.max(0, screen.x) + 'px';
-        this.arrowEditorEl.style.top = Math.max(0, screen.y - 40) + 'px';
+        const dir = el.arrowDirection;
+        const offsetX = (dir === 'up' || dir === 'down') ? 40 : 0;
+        const offsetY = (dir === 'left' || dir === 'right') ? -44 : 0;
+        this.arrowEditorEl.setCssProps({
+            left: Math.max(0, screen.x + offsetX) + 'px',
+            top: Math.max(0, screen.y + offsetY) + 'px',
+        });
 
         // Start arrowhead toggle
         const startBtn = this.createSmallButton(el.showStartArrow ? '◀' : '—', t('arrowEditor.toggleStart'));
@@ -1531,16 +1516,7 @@ export class SimpleDrawView extends TextFileView {
         const mid = this.engine.getArrowMidpoint(arrow);
         const screen = this.engine.canvasToScreen(mid.x, mid.y);
 
-        this.labelEditorEl = this.containerEl.createDiv('simpledraw-arrow-label-editor');
-        this.labelEditorEl.style.position = 'absolute';
-        this.labelEditorEl.style.zIndex = '200';
-        this.labelEditorEl.style.background = 'var(--background-primary)';
-        this.labelEditorEl.style.border = '2px solid var(--interactive-accent)';
-        this.labelEditorEl.style.borderRadius = '4px';
-        this.labelEditorEl.style.padding = '8px';
-        this.labelEditorEl.style.boxShadow = '0 4px 16px rgba(0,0,0,0.2)';
-        this.labelEditorEl.style.minWidth = '200px';
-        this.labelEditorEl.style.maxWidth = '500px';
+        this.labelEditorEl = this.containerEl.createDiv('simpledraw-editor-overlay is-label');
 
         const viewRect = this.containerEl.getBoundingClientRect();
         let left = Math.max(0, screen.x - 100);
@@ -1549,22 +1525,19 @@ export class SimpleDrawView extends TextFileView {
             top = screen.y - 180;
         }
         top = Math.max(0, top);
-        this.labelEditorEl.style.left = left + 'px';
-        this.labelEditorEl.style.top = top + 'px';
+        this.labelEditorEl.setCssProps({ left: left + 'px', top: top + 'px' });
 
         // Toolbar: font size + position + confirm
         const toolbar = this.labelEditorEl.createDiv('simpledraw-editor-toolbar');
-        toolbar.style.display = 'flex';
-        toolbar.style.gap = '4px';
-        toolbar.style.marginBottom = '8px';
-        toolbar.style.alignItems = 'center';
 
         const sizeDisplay = toolbar.createSpan();
         sizeDisplay.textContent = (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) + 'px';
-        sizeDisplay.style.fontSize = '12px';
-        sizeDisplay.style.color = 'var(--text-muted)';
-        sizeDisplay.style.minWidth = '30px';
-        sizeDisplay.style.textAlign = 'right';
+        sizeDisplay.setCssProps({
+            'font-size': '12px',
+            color: 'var(--text-muted)',
+            'min-width': '30px',
+            'text-align': 'right',
+        });
 
         const updateSizeDisplay = () => {
             sizeDisplay.textContent = (arrow.labelFontSize ?? this.settings.labelDefaultFontSize) + 'px';
@@ -1638,23 +1611,12 @@ export class SimpleDrawView extends TextFileView {
         toolbar.appendChild(confirmBtn);
 
         // Textarea
-        const textarea = this.labelEditorEl.createEl('textarea');
-        textarea.style.width = '100%';
-        textarea.style.minHeight = '60px';
-        textarea.style.resize = 'both';
-        textarea.style.border = '1px solid var(--background-modifier-border)';
-        textarea.style.borderRadius = '4px';
-        textarea.style.padding = '6px';
-        textarea.style.background = 'var(--background-primary)';
-        textarea.style.color = 'var(--text-normal)';
-        textarea.style.fontFamily = 'var(--font-text)';
-        textarea.style.fontSize = 'var(--font-text-size)';
+        const textarea = this.labelEditorEl.createEl('textarea', { cls: 'simpledraw-editor-textarea' });
         textarea.value = arrow.labelContent ?? '';
         // Immediately grow to fit existing content
-        textarea.style.height = 'auto';
-        textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
+        textarea.setCssProps({ height: Math.max(60, textarea.scrollHeight) + 'px' });
         textarea.placeholder = t('arrowLabelEditor.placeholder');
-        textarea.focus();
+        textarea.focus({ preventScroll: true });
 
         textarea.addEventListener('keydown', (ev) => {
             if (ev.key === 'Escape') {
@@ -1668,8 +1630,9 @@ export class SimpleDrawView extends TextFileView {
         textarea.addEventListener('input', () => {
             arrow.labelContent = textarea.value;
             // Auto-grow textarea to fit content
-            textarea.style.height = 'auto';
-            textarea.style.height = Math.max(60, textarea.scrollHeight) + 'px';
+            textarea.setCssProps({ height: 'auto' });
+            void textarea.clientHeight;
+            textarea.setCssProps({ height: Math.max(60, textarea.scrollHeight) + 'px' });
             this.requestRender();
         });
 
@@ -1698,39 +1661,43 @@ export class SimpleDrawView extends TextFileView {
         }
 
         const isVertical = (tb.writingMode ?? 'horizontal-tb') === 'vertical-rl';
-        el.style.writingMode = tb.writingMode ?? 'horizontal-tb';
+        el.setCssProps({
+            'writing-mode': tb.writingMode ?? 'horizontal-tb',
+        });
 
         // Content div: use flex so children stack in the block direction
-        el.style.display = 'flex';
-        el.style.flexDirection = isVertical ? 'row' : 'column';
-        el.style.width = '100%';
-        el.style.height = '100%';
+        el.setCssProps({
+            display: 'flex',
+            'flex-direction': isVertical ? 'row' : 'column',
+            width: '100%',
+            height: '100%',
+        });
 
         // Alignment: in vertical mode main axis is row (horizontal), cross axis is column
         if (isVertical) {
             // vAlign maps to justify-content (main axis = horizontal for row)
             switch (tb.vAlign) {
-                case 'top': el.style.justifyContent = 'flex-start'; break;
-                case 'middle': el.style.justifyContent = 'center'; break;
-                case 'bottom': el.style.justifyContent = 'flex-end'; break;
+                case 'top': el.setCssProps({ 'justify-content': 'flex-start' }); break;
+                case 'middle': el.setCssProps({ 'justify-content': 'center' }); break;
+                case 'bottom': el.setCssProps({ 'justify-content': 'flex-end' }); break;
             }
             // hAlign maps to align-items (cross axis = vertical for row)
             switch (tb.hAlign) {
-                case 'left': el.style.alignItems = 'flex-start'; break;
-                case 'center': el.style.alignItems = 'center'; break;
-                case 'right': el.style.alignItems = 'flex-end'; break;
+                case 'left': el.setCssProps({ 'align-items': 'flex-start' }); break;
+                case 'center': el.setCssProps({ 'align-items': 'center' }); break;
+                case 'right': el.setCssProps({ 'align-items': 'flex-end' }); break;
             }
             // text-align only affects inline content, not flex children
-            el.style.textAlign = 'start';
+            el.setCssProps({ 'text-align': 'start' });
         } else {
             // Horizontal mode: vAlign = justify-content (main axis = column)
             switch (tb.vAlign) {
-                case 'top': el.style.justifyContent = 'flex-start'; break;
-                case 'middle': el.style.justifyContent = 'center'; break;
-                case 'bottom': el.style.justifyContent = 'flex-end'; break;
+                case 'top': el.setCssProps({ 'justify-content': 'flex-start' }); break;
+                case 'middle': el.setCssProps({ 'justify-content': 'center' }); break;
+                case 'bottom': el.setCssProps({ 'justify-content': 'flex-end' }); break;
             }
             // Horizontal alignment: text-align for inline content
-            el.style.textAlign = tb.hAlign;
+            el.setCssProps({ 'text-align': tb.hAlign });
         }
     }
 
@@ -2193,18 +2160,10 @@ export class SimpleDrawView extends TextFileView {
             // Create new
             wrapper = this.elementsLayer.createDiv('simpledraw-textbox');
             wrapper.dataset.id = tb.id;
-            wrapper.style.position = 'absolute';
-            wrapper.style.pointerEvents = 'auto';
 
             container = wrapper.createDiv('simpledraw-textbox-inner');
-            container.style.position = 'relative';
-            container.style.borderRadius = '0px';
-            container.style.boxSizing = 'border-box';
-            container.style.overflow = 'hidden';
 
             content = container.createDiv('simpledraw-textbox-content');
-            content.style.padding = '4px';
-            content.style.boxSizing = 'border-box';
 
             // Resize handles
             const positions = ['se', 'sw', 'ne', 'nw'] as const;
@@ -2237,13 +2196,14 @@ export class SimpleDrawView extends TextFileView {
         const isEditing = this.engine.editingTextboxId === tb.id;
 
         // Position and size
-        wrapper.style.left = tb.x + 'px';
-        wrapper.style.top = tb.y + 'px';
-        wrapper.style.width = tb.width + 'px';
-        wrapper.style.height = tb.height + 'px';
+        wrapper.setCssProps({
+            left: tb.x + 'px',
+            top: tb.y + 'px',
+            width: tb.width + 'px',
+            height: tb.height + 'px',
+        });
 
-        container.style.width = '100%';
-        container.style.height = '100%';
+        container.setCssProps({ width: '100%', height: '100%' });
 
         // Visibility (controls border + background)
         const isClipped = (tb.shape ?? 'rectangle') === 'diamond';
@@ -2317,10 +2277,11 @@ export class SimpleDrawView extends TextFileView {
         }
 
         // Content — always visible regardless of `visible` flag
-        content.style.display = '';
-        content.style.width = '100%';
-        content.style.height = '100%';
-        content.style.fontSize = (tb.fontSize ?? 16) + 'px';
+        content.setCssProps({
+            width: '100%',
+            height: '100%',
+            'font-size': (tb.fontSize ?? 16) + 'px',
+        });
 
         this.applyTextAlignment(content, tb);
 
@@ -2337,7 +2298,7 @@ export class SimpleDrawView extends TextFileView {
         // Resize handles
         const handles = wrapper.querySelectorAll('.simpledraw-resize-handle');
         handles.forEach(h => {
-            (h as HTMLElement).style.display = (isSelected && !isEditing) ? 'block' : 'none';
+            (h as HTMLElement).setCssProps({ display: (isSelected && !isEditing) ? 'block' : 'none' });
         });
 
         // Lock icon
@@ -2345,13 +2306,6 @@ export class SimpleDrawView extends TextFileView {
         if (tb.locked) {
             if (!lockIcon) {
                 lockIcon = wrapper.createDiv('simpledraw-lock-icon');
-                lockIcon.style.position = 'absolute';
-                lockIcon.style.top = '2px';
-                lockIcon.style.right = '2px';
-                lockIcon.style.fontSize = '12px';
-                lockIcon.style.pointerEvents = 'none';
-                lockIcon.style.zIndex = '15';
-                lockIcon.style.opacity = '0.6';
                 lockIcon.textContent = '🔒';
             }
         } else {
@@ -2615,8 +2569,17 @@ export class SimpleDrawView extends TextFileView {
     }
 
     rebuildAll(): void {
-        // Clear and rebuild all element DOM
-        this.elementsLayer.innerHTML = '';
+        // Reorder textbox wrappers in DOM to match data array order,
+        // then let the render loop update everything incrementally.
+        // Do NOT use innerHTML = '' — that destroys GPU compositor layers
+        // and causes visible resolution flicker.
+        const tbElements = this.engine.data.elements.filter(e => e.type === 'textbox');
+        for (const tb of tbElements) {
+            const wrapper = this.elementsLayer.querySelector(`[data-id="${tb.id}"]`) as HTMLElement | null;
+            if (wrapper) {
+                this.elementsLayer.appendChild(wrapper);
+            }
+        }
         this.updateMenuButtons();
         this.requestRender();
     }

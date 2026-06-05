@@ -2,7 +2,7 @@
 
 .simpledraw-container {
     position: relative;
-    overflow: visible;
+    overflow: hidden;
     width: 100%;
     height: 100%;
     background: var(--background-primary);
@@ -15,7 +15,6 @@
     width: 100%;
     height: 100%;
     transform-origin: 0 0;
-    will-change: transform;
 }
 
 .simpledraw-grid {
@@ -129,6 +128,7 @@
     height: 100%;
     pointer-events: none;
     z-index: 20;
+    overflow: visible;
 }
 
 .simpledraw-elements {
@@ -138,6 +138,7 @@
     width: 100%;
     height: 100%;
     pointer-events: none;
+    overflow: visible;
 }
 
 .simpledraw-preview {
@@ -309,83 +310,58 @@
     align-items: center;
 }
 
-/* ===== Canvas Common Styles ===== */
-.simpledraw-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    cursor: default;
-    outline: none;
-}
-.simpledraw-viewport {
+/* ===== Editor Overlays ===== */
+.simpledraw-editor-overlay {
     position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    transform-origin: 0 0;
-    overflow: visible;
+    z-index: 200;
+    background: var(--background-primary);
+    border: 2px solid var(--interactive-accent);
+    border-radius: 4px;
+    padding: 8px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
 }
-.simpledraw-elements {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 10;
+.simpledraw-editor-overlay.is-textbox {
+    min-width: 250px;
+    max-width: 500px;
 }
-.simpledraw-grid {
-    position: absolute;
-    width: 10000px; height: 10000px;
-    z-index: 0;
-}
-.simpledraw-svg {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 20;
-    overflow: visible;
-    pointer-events: none;
-}
-.simpledraw-preview {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%; height: 100%;
-    z-index: 25;
-    pointer-events: none;
-}
-.simpledraw-selection {
-    position: absolute;
-    border: 1px dashed var(--interactive-accent);
-    background: rgba(74, 144, 217, 0.1);
-    z-index: 30;
-    pointer-events: none;
-}
-.simpledraw-menu {
-    position: absolute;
-    top: 8px; left: 8px;
+.simpledraw-editor-overlay.is-arrow {
     display: flex;
     gap: 4px;
+}
+.simpledraw-editor-overlay.is-label {
+    min-width: 200px;
+    max-width: 500px;
+}
+.simpledraw-editor-textarea {
+    width: 100%;
+    min-height: 60px;
+    resize: both;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 4px;
     padding: 6px;
+    background: var(--background-primary);
+    color: var(--text-normal);
+    font-family: var(--font-text);
+    font-size: var(--font-text-size);
+}
+
+/* ===== Direction Menu ===== */
+.simpledraw-dir-menu {
     background: var(--background-primary);
     border: 1px solid var(--background-modifier-border);
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    z-index: 100;
+    z-index: 200;
 }
-.simpledraw-menu-btn, .simpledraw-small-btn {
+.simpledraw-dir-btn {
+    width: 28px;
+    height: 28px;
     border: 1px solid transparent;
     border-radius: 4px;
     background: transparent;
     cursor: pointer;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--text-normal);
 }
-.simpledraw-menu-btn {
-    width: 28px; height: 28px;
-    font-size: 14px;
-}
-.simpledraw-small-btn {
-    width: 24px; height: 24px;
-    font-size: 12px;
-    border-radius: 3px;
-}
+

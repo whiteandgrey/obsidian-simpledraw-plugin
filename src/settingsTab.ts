@@ -178,11 +178,11 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
         label.textContent = title;
 
         const body = section.createDiv({ cls: 'sd-settings-body' });
-        if (!defaultOpen) body.style.display = 'none';
+        if (!defaultOpen) body.setCssProps({ display: 'none' });
 
         header.addEventListener('click', () => {
             const isOpen = body.style.display !== 'none';
-            body.style.display = isOpen ? 'none' : 'block';
+            body.setCssProps({ display: isOpen ? 'none' : 'block' });
             arrow.textContent = isOpen ? '▶' : '▼';
         });
 
@@ -200,7 +200,7 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
             row.createSpan({ text: bindingLabel(binding) + '  →  ' + actionName });
 
             const delBtn = row.createEl('button', { text: t('settings.shortcuts.delete') });
-            delBtn.style.marginLeft = 'auto';
+            delBtn.setCssProps({ 'margin-left': 'auto' });
             delBtn.onclick = async () => {
                 this.plugin.settings.shortcuts.splice(i, 1);
                 await this.plugin.saveSettings();
@@ -211,10 +211,12 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
 
     private startAddShortcut(listContainer: HTMLElement): void {
         const recEl = this.containerEl.createDiv();
-        recEl.style.marginTop = '8px';
-        recEl.style.padding = '12px';
-        recEl.style.border = '1px solid var(--interactive-accent)';
-        recEl.style.borderRadius = '6px';
+        recEl.setCssProps({
+            'margin-top': '8px',
+            padding: '12px',
+            border: '1px solid var(--interactive-accent)',
+            'border-radius': '6px',
+        });
 
         recEl.createSpan({ text: t('settings.shortcuts.recording') });
 
