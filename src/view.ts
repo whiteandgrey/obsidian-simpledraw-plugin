@@ -1,14 +1,14 @@
 // Custom View for SimpleDraw files
 
 import { toCanvas } from 'html-to-image';
-import { TextFileView, MarkdownRenderer, WorkspaceLeaf, Notice, Modal, Setting, Menu } from 'obsidian';
+import { TextFileView, MarkdownRenderer, WorkspaceLeaf, Notice, Modal, Setting, App, Menu } from 'obsidian';
 import { SimpleDrawEngine } from './engine';
-import { SimpleDrawSettings, actionToMarkdown } from './settings';
+import { SimpleDrawSettings, ShortcutBinding, actionToMarkdown } from './settings';
 import { t } from './locale';
 import {
     SimpleDrawData, InteractionMode, ElementData, TextBoxData, ArrowData,
-    ArrowConnection, FreePoint, ArrowDirection,
-    GRID_SIZE, ANCHOR_SIZE,
+    AnchorType, ArrowConnection, FreePoint, ArrowDirection,
+    GRID_SIZE, ANCHOR_SIZE, SNAP_DISTANCE,
     MIN_TEXTBOX_WIDTH, MIN_TEXTBOX_HEIGHT,
     DEFAULT_TEXTBOX_WIDTH, DEFAULT_TEXTBOX_HEIGHT,
     DEFAULT_DATA,
@@ -225,38 +225,93 @@ export class SimpleDrawView extends TextFileView {
     buildDOM(): void {
         const contentEl = this.contentEl;
         contentEl.empty();
-        contentEl.addClass('simpledraw-container');
+        contentEl.style.position = 'relative';
+        contentEl.style.overflow = 'hidden';
+        contentEl.style.width = '100%';
+        contentEl.style.height = '100%';
+        contentEl.style.userSelect = 'none';
 
         // Container
         this.containerEl = contentEl.createDiv('simpledraw-container');
+        this.containerEl.style.width = '100%';
+        this.containerEl.style.height = '100%';
+        this.containerEl.style.position = 'relative';
+        this.containerEl.style.overflow = 'hidden';
+        this.containerEl.style.cursor = 'default';
         this.containerEl.setAttribute('tabindex', '0');
         this.containerEl.focus();
 
         // Viewport (for pan/zoom transform)
         this.viewportEl = this.containerEl.createDiv('simpledraw-viewport');
+        this.viewportEl.style.position = 'absolute';
+        this.viewportEl.style.transformOrigin = '0 0';
+        this.viewportEl.style.width = '100%';
+        this.viewportEl.style.height = '100%';
 
         // Grid background
         this.gridEl = this.viewportEl.createDiv('simpledraw-grid');
+        this.gridEl.style.position = 'absolute';
         this.gridEl.style.top = '-5000px';
         this.gridEl.style.left = '-5000px';
+        this.gridEl.style.width = '10000px';
+        this.gridEl.style.height = '10000px';
+        this.gridEl.style.pointerEvents = 'none';
+        this.gridEl.style.zIndex = '0';
 
         // SVG layer for arrows
         this.svgLayer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         this.svgLayer.classList.add('simpledraw-svg');
+        this.svgLayer.style.position = 'absolute';
+        this.svgLayer.style.top = '0';
+        this.svgLayer.style.left = '0';
+        this.svgLayer.style.width = '100%';
+        this.svgLayer.style.height = '100%';
+        this.svgLayer.style.pointerEvents = 'none';
+        this.svgLayer.style.overflow = 'visible';
         this.viewportEl.appendChild(this.svgLayer);
 
         // Elements layer for textboxes
         this.elementsLayer = this.viewportEl.createDiv('simpledraw-elements');
+        this.elementsLayer.style.position = 'absolute';
+        this.elementsLayer.style.top = '0';
+        this.elementsLayer.style.left = '0';
+        this.elementsLayer.style.width = '100%';
+        this.elementsLayer.style.height = '100%';
+        this.elementsLayer.style.pointerEvents = 'none';
+        this.elementsLayer.style.overflow = 'visible';
+        this.elementsLayer.style.zIndex = '10';
 
         // Preview layer (temporary rectangles, dashed lines)
         this.previewLayer = this.viewportEl.createDiv('simpledraw-preview');
+        this.previewLayer.style.position = 'absolute';
+        this.previewLayer.style.top = '0';
+        this.previewLayer.style.left = '0';
+        this.previewLayer.style.width = '100%';
+        this.previewLayer.style.height = '100%';
+        this.previewLayer.style.pointerEvents = 'none';
 
         // Selection box
         this.selectionBox = this.viewportEl.createDiv('simpledraw-selection');
+        this.selectionBox.style.position = 'absolute';
+        this.selectionBox.style.border = '2px dashed #4a90d9';
+        this.selectionBox.style.backgroundColor = 'rgba(74, 144, 217, 0.1)';
         this.selectionBox.style.display = 'none';
+        this.selectionBox.style.pointerEvents = 'none';
+        this.selectionBox.style.zIndex = '30';
 
         // Menu bar (top-left corner, outside viewport)
         this.menuEl = this.containerEl.createDiv('simpledraw-menu');
+        this.menuEl.style.position = 'absolute';
+        this.menuEl.style.top = '8px';
+        this.menuEl.style.left = '8px';
+        this.menuEl.style.zIndex = '100';
+        this.menuEl.style.display = 'flex';
+        this.menuEl.style.gap = '4px';
+        this.menuEl.style.background = 'var(--background-primary)';
+        this.menuEl.style.border = '1px solid var(--background-modifier-border)';
+        this.menuEl.style.borderRadius = '6px';
+        this.menuEl.style.padding = '4px';
+        this.menuEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
 
         this.btnInsertTextbox = this.createMenuButton('T', t('toolbar.insertTextbox'));
         this.btnInsertArrow = this.createMenuButton('→', t('toolbar.insertArrow'));
@@ -283,6 +338,17 @@ export class SimpleDrawView extends TextFileView {
         btn.className = 'simpledraw-menu-btn';
         btn.textContent = label;
         btn.title = title;
+        btn.style.width = '28px';
+        btn.style.height = '28px';
+        btn.style.border = '1px solid transparent';
+        btn.style.borderRadius = '4px';
+        btn.style.background = 'transparent';
+        btn.style.cursor = 'pointer';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.fontSize = '14px';
+        btn.style.color = 'var(--text-normal)';
         return btn;
     }
 
@@ -1361,9 +1427,19 @@ export class SimpleDrawView extends TextFileView {
 
     createSmallButton(label: string, title: string): HTMLElement {
         const btn = document.createElement('button');
-        btn.className = 'simpledraw-small-btn';
         btn.textContent = label;
         btn.title = title;
+        btn.style.width = '24px';
+        btn.style.height = '24px';
+        btn.style.border = '1px solid transparent';
+        btn.style.borderRadius = '3px';
+        btn.style.background = 'transparent';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '12px';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.justifyContent = 'center';
+        btn.style.color = 'var(--text-normal)';
         return btn;
     }
 

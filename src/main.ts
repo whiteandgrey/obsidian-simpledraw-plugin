@@ -1,11 +1,11 @@
 // Main plugin entry point
 
-import { Plugin, WorkspaceLeaf, TFolder } from 'obsidian';
+import { Plugin, WorkspaceLeaf, MarkdownView, TFile, TFolder, Notice } from 'obsidian';
 import { SimpleDrawView, VIEW_TYPE_SIMPLEDRAW } from './view';
 import { SimpleDrawEngine } from './engine';
 import { SimpleDrawSettings, DEFAULT_SETTINGS } from './settings';
 import { SimpleDrawSettingTab } from './settingsTab';
-import { DEFAULT_DATA } from './types';
+import { DEFAULT_DATA, SimpleDrawData } from './types';
 import { t, setLanguage } from './locale';
 
 export default class SimpleDrawPlugin extends Plugin {
