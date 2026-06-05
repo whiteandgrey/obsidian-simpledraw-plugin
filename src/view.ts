@@ -1,14 +1,14 @@
 // Custom View for SimpleDraw files
 
 import { toCanvas } from 'html-to-image';
-import { TextFileView, MarkdownRenderer, WorkspaceLeaf, Notice, Modal, Setting, App, Menu } from 'obsidian';
+import { TextFileView, MarkdownRenderer, WorkspaceLeaf, Notice, Modal, Setting, Menu } from 'obsidian';
 import { SimpleDrawEngine } from './engine';
-import { SimpleDrawSettings, ShortcutBinding, actionToMarkdown } from './settings';
+import { SimpleDrawSettings, actionToMarkdown } from './settings';
 import { t } from './locale';
 import {
     SimpleDrawData, InteractionMode, ElementData, TextBoxData, ArrowData,
-    AnchorType, ArrowConnection, FreePoint, ArrowDirection,
-    GRID_SIZE, ANCHOR_SIZE, SNAP_DISTANCE,
+    ArrowConnection, FreePoint, ArrowDirection,
+    GRID_SIZE, ANCHOR_SIZE,
     MIN_TEXTBOX_WIDTH, MIN_TEXTBOX_HEIGHT,
     DEFAULT_TEXTBOX_WIDTH, DEFAULT_TEXTBOX_HEIGHT,
     DEFAULT_DATA,
@@ -1427,19 +1427,9 @@ export class SimpleDrawView extends TextFileView {
 
     createSmallButton(label: string, title: string): HTMLElement {
         const btn = document.createElement('button');
+        btn.className = 'simpledraw-small-btn';
         btn.textContent = label;
         btn.title = title;
-        btn.style.width = '24px';
-        btn.style.height = '24px';
-        btn.style.border = '1px solid transparent';
-        btn.style.borderRadius = '3px';
-        btn.style.background = 'transparent';
-        btn.style.cursor = 'pointer';
-        btn.style.fontSize = '12px';
-        btn.style.display = 'flex';
-        btn.style.alignItems = 'center';
-        btn.style.justifyContent = 'center';
-        btn.style.color = 'var(--text-normal)';
         return btn;
     }
 

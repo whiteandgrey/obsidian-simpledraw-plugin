@@ -243,3 +243,61 @@
     user-select: none;
     pointer-events: none;
 }
+
+/* Small button used in editors (createSmallButton) */
+.simpledraw-small-btn {
+    width: 24px; height: 24px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-normal);
+}
+.simpledraw-small-btn:hover {
+    background: var(--background-modifier-hover);
+    border-color: var(--background-modifier-border);
+}
+
+/* Settings tab - collapsible sections */
+.sd-settings-section {
+    margin-bottom: 12px;
+    border: 1px solid var(--background-modifier-border);
+    border-radius: 6px;
+    overflow: hidden;
+}
+.sd-settings-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    cursor: pointer;
+    background: var(--background-secondary);
+    user-select: none;
+    gap: 8px;
+}
+.sd-settings-arrow {
+    font-size: 10px;
+    color: var(--text-muted);
+    transition: transform 0.15s;
+}
+.sd-settings-label {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text-normal);
+}
+.sd-settings-body {
+    padding: 8px 12px 12px;
+}
+.sd-settings-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--background-modifier-border);
+}
+.sd-add-btn {
+    margin-top: 8px;
+}

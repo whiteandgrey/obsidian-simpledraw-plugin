@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { SimpleDrawSettings, getArrowShapes, ArrowShape, AnchorScheme, ShortcutBinding, getShortcutActions, TextShortcutAction, bindingLabel } from './settings';
+import { getArrowShapes, ArrowShape, AnchorScheme, ShortcutBinding, getShortcutActions, TextShortcutAction, bindingLabel } from './settings';
 import type SimpleDrawPlugin from './main';
 import { t, setLanguage, Language } from './locale';
 
@@ -15,7 +15,7 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: t('settings.title') });
+        new Setting(containerEl).setName(t('settings.title')).setHeading();
 
         // --- Basic settings ---
         const basicSection = this.createCollapsibleSection(containerEl, t('settings.section.basic'), true);
@@ -162,41 +162,21 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
         const listEl = shortcutsBody.createDiv();
         this.renderShortcutList(listEl);
 
-        const addBtn = shortcutsBody.createEl('button', { text: t('settings.shortcuts.add') });
-        addBtn.style.marginTop = '8px';
+        const addBtn = shortcutsBody.createEl('button', { text: t('settings.shortcuts.add'), cls: 'sd-add-btn' });
         addBtn.onclick = () => this.startAddShortcut(listEl);
     }
 
     private createCollapsibleSection(container: HTMLElement, title: string, defaultOpen: boolean): { header: HTMLElement; body: HTMLElement } {
-        const section = container.createDiv();
-        section.style.marginBottom = '12px';
-        section.style.border = '1px solid var(--background-modifier-border)';
-        section.style.borderRadius = '6px';
-        section.style.overflow = 'hidden';
+        const section = container.createDiv({ cls: 'sd-settings-section' });
+        const header = section.createDiv({ cls: 'sd-settings-header' });
 
-        const header = section.createDiv();
-        header.style.display = 'flex';
-        header.style.alignItems = 'center';
-        header.style.padding = '8px 12px';
-        header.style.cursor = 'pointer';
-        header.style.background = 'var(--background-secondary)';
-        header.style.userSelect = 'none';
-        header.style.gap = '8px';
-
-        const arrow = header.createSpan();
+        const arrow = header.createSpan({ cls: 'sd-settings-arrow' });
         arrow.textContent = defaultOpen ? '▼' : '▶';
-        arrow.style.fontSize = '10px';
-        arrow.style.color = 'var(--text-muted)';
-        arrow.style.transition = 'transform 0.15s';
 
-        const label = header.createSpan();
+        const label = header.createSpan({ cls: 'sd-settings-label' });
         label.textContent = title;
-        label.style.fontWeight = '600';
-        label.style.fontSize = '14px';
-        label.style.color = 'var(--text-normal)';
 
-        const body = section.createDiv();
-        body.style.padding = '8px 12px 12px';
+        const body = section.createDiv({ cls: 'sd-settings-body' });
         if (!defaultOpen) body.style.display = 'none';
 
         header.addEventListener('click', () => {
@@ -211,13 +191,7 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
     private renderShortcutList(container: HTMLElement): void {
         container.empty();
         for (const [i, binding] of this.plugin.settings.shortcuts.entries()) {
-            const row = container.createDiv();
-            row.style.display = 'flex';
-            row.style.alignItems = 'center';
-            row.style.gap = '8px';
-            row.style.padding = '6px 0';
-            row.style.borderBottom = '1px solid var(--background-modifier-border)';
-
+            const row = container.createDiv({ cls: 'sd-settings-row' });
             const label = getShortcutActions().find(a => a.value === binding.action);
             const actionName = label ? label.label : binding.action;
 

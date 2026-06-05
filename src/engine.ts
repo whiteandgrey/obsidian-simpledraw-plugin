@@ -3,10 +3,9 @@
 import {
     SimpleDrawData, ElementData, TextBoxData, ArrowData,
     ArrowConnection, FreePoint, AnchorType, ArrowDirection,
-    InteractionMode, ViewState, HistoryEntry,
-    GRID_SIZE, ANCHOR_SIZE, SNAP_DISTANCE,
+    InteractionMode, HistoryEntry,
+    SNAP_DISTANCE,
     MIN_TEXTBOX_WIDTH, MIN_TEXTBOX_HEIGHT,
-    DEFAULT_TEXTBOX_WIDTH, DEFAULT_TEXTBOX_HEIGHT,
     DEFAULT_DATA,
 } from './types';
 import { SimpleDrawSettings } from './settings';
@@ -710,7 +709,7 @@ export class SimpleDrawEngine {
     // --- Element Operations ---
 
     createTextBox(x: number, y: number, width: number, height: number): string {
-        const id = 'tb_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const id = 'tb_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
         const tb: TextBoxData = {
             id,
             type: 'textbox',
@@ -734,7 +733,7 @@ export class SimpleDrawEngine {
     }
 
     createArrow(startConn: ArrowConnection | FreePoint, endConn: ArrowConnection | FreePoint): string {
-        const id = 'ar_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+        const id = 'ar_' + Date.now() + '_' + Math.random().toString(36).substring(2, 7);
         const arrow: ArrowData = {
             id,
             type: 'arrow',
