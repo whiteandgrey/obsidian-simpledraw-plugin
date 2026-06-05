@@ -88,6 +88,7 @@ export interface SimpleDrawSettings {
     snapEnabled: boolean;
     showAnchorDots: boolean;
     textboxDefaultFontSize: number;
+    labelDefaultFontSize: number;
     anchorScheme: AnchorScheme;
     snapPreviewRadius: number;
 }
@@ -103,6 +104,7 @@ export const DEFAULT_SETTINGS: SimpleDrawSettings = {
     snapEnabled: true,
     showAnchorDots: false,
     textboxDefaultFontSize: 16,
+    labelDefaultFontSize: 16,
     anchorScheme: 'scheme1',
     snapPreviewRadius: 8,
 };

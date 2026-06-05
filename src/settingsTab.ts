@@ -143,6 +143,18 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
+        new Setting(textboxBody)
+            .setName(t('settings.labelDefaultFontSize.name'))
+            .setDesc(t('settings.labelDefaultFontSize.desc'))
+            .addSlider(slider => slider
+                .setLimits(8, 72, 2)
+                .setValue(this.plugin.settings.labelDefaultFontSize)
+                .setDynamicTooltip()
+                .onChange(async (value) => {
+                    this.plugin.settings.labelDefaultFontSize = value;
+                    await this.plugin.saveSettings();
+                }));
+
         // --- Shortcut settings ---
         const shortcutsSection = this.createCollapsibleSection(containerEl, t('settings.section.shortcuts'), true);
         const shortcutsBody = shortcutsSection.body;

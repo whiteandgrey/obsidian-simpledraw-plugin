@@ -1907,13 +1907,36 @@ export class SimpleDrawView extends TextFileView {
 
             if (points.length >= 2) {
                 const linePts = points.slice();
+
+                // Helper: truncation amount per arrow shape
+                const truncForShape = (): number => {
+                    const s = this.settings.arrowShape;
+                    if (s === 'circle') return headSize * 0.4;
+                    if (s === 'v-shape') return 0;
+                    return headSize;
+                };
+
+                // Start truncation (mirror of end logic)
+                if (arrow.showStartArrow) {
+                    const first = points[0]!;
+                    const next = points[1]!;
+                    const sAngle = Math.atan2(next.y - first.y, next.x - first.x);
+                    const sTr = truncForShape();
+                    linePts[0] = {
+                        x: first.x + Math.cos(sAngle) * sTr,
+                        y: first.y + Math.sin(sAngle) * sTr,
+                    };
+                }
+
+                // End truncation
                 if (arrow.showEndArrow) {
                     const last = points[points.length - 1]!;
                     const prev = points[points.length - 2]!;
                     const eAngle = Math.atan2(last.y - prev.y, last.x - prev.x);
+                    const eTr = truncForShape();
                     linePts[linePts.length - 1] = {
-                        x: last.x - Math.cos(eAngle) * headSize,
-                        y: last.y - Math.sin(eAngle) * headSize,
+                        x: last.x - Math.cos(eAngle) * eTr,
+                        y: last.y - Math.sin(eAngle) * eTr,
                     };
                 }
                 const lineOrigin = linePts[0]!;
