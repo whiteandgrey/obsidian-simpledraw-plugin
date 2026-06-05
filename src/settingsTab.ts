@@ -15,7 +15,7 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
         const { containerEl } = this;
         containerEl.empty();
 
-        new Setting(containerEl).setName(t('settings.title')).setHeading();
+        containerEl.createEl('h2', { text: t('settings.title') });
 
         // --- Basic settings ---
         const basicSection = this.createCollapsibleSection(containerEl, t('settings.section.basic'), true);
@@ -162,27 +162,46 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
         const listEl = shortcutsBody.createDiv();
         this.renderShortcutList(listEl);
 
-        const addBtn = shortcutsBody.createEl('button', { text: t('settings.shortcuts.add'), cls: 'sd-add-btn' });
+        const addBtn = shortcutsBody.createEl('button', { text: t('settings.shortcuts.add') });
+        addBtn.style.marginTop = '8px';
         addBtn.onclick = () => this.startAddShortcut(listEl);
     }
 
     private createCollapsibleSection(container: HTMLElement, title: string, defaultOpen: boolean): { header: HTMLElement; body: HTMLElement } {
-        const section = container.createDiv({ cls: 'sd-settings-section' });
+        const section = container.createDiv();
+        section.style.marginBottom = '12px';
+        section.style.border = '1px solid var(--background-modifier-border)';
+        section.style.borderRadius = '6px';
+        section.style.overflow = 'hidden';
 
-        const header = section.createDiv({ cls: 'sd-settings-header' });
+        const header = section.createDiv();
+        header.style.display = 'flex';
+        header.style.alignItems = 'center';
+        header.style.padding = '8px 12px';
+        header.style.cursor = 'pointer';
+        header.style.background = 'var(--background-secondary)';
+        header.style.userSelect = 'none';
+        header.style.gap = '8px';
 
-        const arrow = header.createSpan({ cls: 'sd-settings-arrow' });
+        const arrow = header.createSpan();
         arrow.textContent = defaultOpen ? '▼' : '▶';
+        arrow.style.fontSize = '10px';
+        arrow.style.color = 'var(--text-muted)';
+        arrow.style.transition = 'transform 0.15s';
 
-        const label = header.createSpan({ cls: 'sd-settings-label' });
+        const label = header.createSpan();
         label.textContent = title;
+        label.style.fontWeight = '600';
+        label.style.fontSize = '14px';
+        label.style.color = 'var(--text-normal)';
 
-        const body = section.createDiv({ cls: 'sd-settings-body' });
-        if (!defaultOpen) body.setCssProps({ display: 'none' });
+        const body = section.createDiv();
+        body.style.padding = '8px 12px 12px';
+        if (!defaultOpen) body.style.display = 'none';
 
         header.addEventListener('click', () => {
             const isOpen = body.style.display !== 'none';
-            body.setCssProps({ display: isOpen ? 'none' : 'block' });
+            body.style.display = isOpen ? 'none' : 'block';
             arrow.textContent = isOpen ? '▶' : '▼';
         });
 
@@ -192,14 +211,20 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
     private renderShortcutList(container: HTMLElement): void {
         container.empty();
         for (const [i, binding] of this.plugin.settings.shortcuts.entries()) {
-            const row = container.createDiv({ cls: 'sd-settings-row' });
+            const row = container.createDiv();
+            row.style.display = 'flex';
+            row.style.alignItems = 'center';
+            row.style.gap = '8px';
+            row.style.padding = '6px 0';
+            row.style.borderBottom = '1px solid var(--background-modifier-border)';
 
             const label = getShortcutActions().find(a => a.value === binding.action);
             const actionName = label ? label.label : binding.action;
 
             row.createSpan({ text: bindingLabel(binding) + '  →  ' + actionName });
 
-            const delBtn = row.createEl('button', { text: t('settings.shortcuts.delete'), cls: 'sd-del-btn' });
+            const delBtn = row.createEl('button', { text: t('settings.shortcuts.delete') });
+            delBtn.style.marginLeft = 'auto';
             delBtn.onclick = async () => {
                 this.plugin.settings.shortcuts.splice(i, 1);
                 await this.plugin.saveSettings();
@@ -209,7 +234,11 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
     }
 
     private startAddShortcut(listContainer: HTMLElement): void {
-        const recEl = this.containerEl.createDiv({ cls: 'sd-rec-container' });
+        const recEl = this.containerEl.createDiv();
+        recEl.style.marginTop = '8px';
+        recEl.style.padding = '12px';
+        recEl.style.border = '1px solid var(--interactive-accent)';
+        recEl.style.borderRadius = '6px';
 
         recEl.createSpan({ text: t('settings.shortcuts.recording') });
 
@@ -245,9 +274,18 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
             const label = bindingLabel(binding);
             recEl.createSpan({ text: t('settings.shortcuts.keyLabel') + label });
 
-            const dropdown = recEl.createEl('select', { cls: 'sd-rec-dropdown' });
+            const dropdown = recEl.createEl('select');
+            dropdown.style.marginLeft = '8px';
+            for (const a of getShortcutActions()) {
+                const opt = dropdown.createEl('option');
+                opt.value = a.value;
+                opt.textContent = a.label;
+            }
 
-            const btnRow = recEl.createDiv({ cls: 'sd-rec-btn-row' });
+            const btnRow = recEl.createDiv();
+            btnRow.style.marginTop = '8px';
+            btnRow.style.display = 'flex';
+            btnRow.style.gap = '8px';
 
             const confirmBtn = btnRow.createEl('button', { text: t('settings.shortcuts.confirm') });
             confirmBtn.onclick = async () => {
