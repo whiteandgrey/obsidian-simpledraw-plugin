@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import { getArrowShapes, ArrowShape, AnchorScheme, ShortcutBinding, getShortcutActions, TextShortcutAction, bindingLabel } from './settings';
+import { SimpleDrawSettings, getArrowShapes, ArrowShape, AnchorScheme, ShortcutBinding, getShortcutActions, TextShortcutAction, bindingLabel } from './settings';
 import type SimpleDrawPlugin from './main';
 import { t, setLanguage, Language } from './locale';
 
@@ -168,6 +168,7 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
 
     private createCollapsibleSection(container: HTMLElement, title: string, defaultOpen: boolean): { header: HTMLElement; body: HTMLElement } {
         const section = container.createDiv({ cls: 'sd-settings-section' });
+
         const header = section.createDiv({ cls: 'sd-settings-header' });
 
         const arrow = header.createSpan({ cls: 'sd-settings-arrow' });
@@ -192,6 +193,7 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
         container.empty();
         for (const [i, binding] of this.plugin.settings.shortcuts.entries()) {
             const row = container.createDiv({ cls: 'sd-settings-row' });
+
             const label = getShortcutActions().find(a => a.value === binding.action);
             const actionName = label ? label.label : binding.action;
 
@@ -248,18 +250,9 @@ export class SimpleDrawSettingTab extends PluginSettingTab {
             const label = bindingLabel(binding);
             recEl.createSpan({ text: t('settings.shortcuts.keyLabel') + label });
 
-            const dropdown = recEl.createEl('select');
-            dropdown.style.marginLeft = '8px';
-            for (const a of getShortcutActions()) {
-                const opt = dropdown.createEl('option');
-                opt.value = a.value;
-                opt.textContent = a.label;
-            }
+            const dropdown = recEl.createEl('select', { cls: 'sd-rec-dropdown' });
 
-            const btnRow = recEl.createDiv();
-            btnRow.style.marginTop = '8px';
-            btnRow.style.display = 'flex';
-            btnRow.style.gap = '8px';
+            const btnRow = recEl.createDiv({ cls: 'sd-rec-btn-row' });
 
             const confirmBtn = btnRow.createEl('button', { text: t('settings.shortcuts.confirm') });
             confirmBtn.onclick = async () => {
